@@ -1,12 +1,12 @@
-# Computer Warrior v0.0.7.2 Automated QA Notes
+# Computer Warrior v0.0.8 Automated QA Notes
 
 - Result: **PASS**
-- Generated: 2026-07-23T06:32:46.413935+00:00
+- Generated: 2026-07-23T07:07:38.019941+00:00
 - Python: 3.13.2
 - Platform: Windows-11-10.0.26200-SP0
 - pynput in test environment: 1.8.2
 - Required Windows runtime dependency: pynput 1.8.2+
-- Tests run: 30
+- Tests run: 31
 - Failures: 0
 - Errors: 0
 - Skipped: 0
@@ -35,6 +35,7 @@
 - Beta dashboard invite field and private Worker configuration separation.
 - Cloudflare-compatible User-Agent on Python Worker requests.
 - Workers Free CPU-compatible beta password work factor.
+- Local dashboard rank, session-pulse and aggregate activity-mix UI contract.
 - Direct loading of v0.0.1-hotfix.1 schema-version-1 stats without XP loss.
 
 ## Test runner output
@@ -48,6 +49,7 @@ test_live_dashboard_rewrites_fixed_rows_and_skips_duplicates (test_core.Dashboar
 test_web_payload_exposes_only_aggregate_dashboard_values (test_core.DashboardTests.test_web_payload_exposes_only_aggregate_dashboard_values) ... ok
 test_beta_invite_code_is_sent_for_registration_but_not_saved (test_core.OnlineSyncTests.test_beta_invite_code_is_sent_for_registration_but_not_saved) ... ok
 test_dashboard_contains_a_beta_invite_field (test_core.OnlineSyncTests.test_dashboard_contains_a_beta_invite_field) ... ok
+test_dashboard_game_loop_uses_only_existing_aggregate_metrics (test_core.OnlineSyncTests.test_dashboard_game_loop_uses_only_existing_aggregate_metrics) ... ok
 test_new_xp_is_queued_once_then_synced_once (test_core.OnlineSyncTests.test_new_xp_is_queued_once_then_synced_once) ... ok
 test_normal_sync_batches_five_minutes_without_leaderboard_polling (test_core.OnlineSyncTests.test_normal_sync_batches_five_minutes_without_leaderboard_polling) ... ok
 test_online_refresh_route_returns_json_instead_of_an_html_404 (test_core.OnlineSyncTests.test_online_refresh_route_returns_json_instead_of_an_html_404) ... ok
@@ -72,7 +74,7 @@ test_session_daily_lifetime_and_daily_rollover (test_core.TrackerTests.test_sess
 test_second_instance_is_rejected (test_core.WindowsMutexTests.test_second_instance_is_rejected) ... ok
 
 ----------------------------------------------------------------------
-Ran 30 tests in 0.846s
+Ran 31 tests in 1.025s
 
 OK
 ```

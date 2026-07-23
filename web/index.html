@@ -63,7 +63,7 @@
     .icon-button:hover, .button:hover { transform: translateY(-1px); border-color: rgba(82,229,246,.55); background: rgba(82,229,246,.1); }
 
     .main { padding: clamp(24px, 5vw, 58px); min-height: 530px; display: grid; place-items: center; }
-    .hero { width: min(700px, 100%); display: grid; grid-template-columns: 190px 1fr; align-items: center; gap: clamp(25px, 5vw, 55px); }
+    .hero { width: min(760px, 100%); display: grid; grid-template-columns: 190px 1fr; align-items: center; gap: clamp(25px, 5vw, 55px); }
     .avatar { position: relative; width: 184px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 38% 62% 57% 43% / 42% 44% 56% 58%; background: radial-gradient(circle at 47% 35%, rgba(154,249,255,.7) 0 4%, transparent 4.5%), radial-gradient(circle at 50% 40%, #143851 0 27%, #0b2137 28% 44%, #061322 45%); border: 1px solid rgba(82,229,246,.45); box-shadow: inset 0 0 38px rgba(50,213,239,.18), 0 0 46px rgba(24,175,210,.22); }
     .avatar::before { content: ""; position: absolute; inset: -12px; border: 1px solid rgba(82,229,246,.16); border-radius: inherit; transform: rotate(-9deg); }
     .avatar span { margin-top: 87px; color: var(--cyan); font-size: .82rem; font-weight: 900; letter-spacing: .18em; text-shadow: 0 0 14px var(--cyan); }
@@ -75,6 +75,9 @@
     .bar { height: 10px; flex: 1; overflow: hidden; border: 1px solid rgba(117,184,223,.16); border-radius: 50px; background: #071524; }
     .bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--cyan-dark), var(--cyan)); box-shadow: 0 0 18px rgba(82,229,246,.7); }
     .until { margin: 11px 0 0; color: var(--muted); font-size: .84rem; }
+    .identity-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0 0; }
+    .rank-chip, .signal-chip { display: inline-flex; align-items: center; gap: 7px; min-height: 29px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: rgba(8,28,47,.64); font-size: .7rem; font-weight: 800; letter-spacing: .06em; }
+    .rank-chip { color: var(--gold); border-color: rgba(255,211,106,.25); }.rank-chip::before { content: "◆"; font-size: .55rem; }.signal-chip strong { color: var(--cyan); }
 
     .activity-toggle { position: absolute; right: 24px; top: 50%; width: 134px; padding: 16px 14px; transform: translateY(-50%); text-align: left; color: var(--text); border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(145deg, rgba(23,57,87,.84), rgba(8,24,42,.94)); box-shadow: 0 12px 30px rgba(0,0,0,.2); cursor: pointer; transition: .2s ease; }
     .activity-toggle:hover { border-color: rgba(82,229,246,.64); transform: translateY(-50%) translateX(-3px); }
@@ -95,12 +98,13 @@
     body.drawer-open { overflow: hidden; } body.drawer-open .drawer { transform: none; } body.drawer-open .drawer-backdrop { opacity: 1; pointer-events: auto; }
     .drawer-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }.drawer-header h2 { margin: 0; font-size: 1.1rem; letter-spacing: .1em; }.drawer-header p { margin: 7px 0 0; color: var(--gold); font-weight: 800; font-size: .84rem; }
     .metrics { display: grid; gap: 11px; margin: 22px 0; }.metric { padding: 16px; display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); }.metric-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 11px; color: var(--cyan); background: rgba(82,229,246,.08); font-size: 1.2rem; }.metric h3 { margin: 0; font-size: .9rem; }.metric p { margin: 4px 0 0; color: var(--muted); font-size: .75rem; }.metric strong { color: var(--gold); font-size: .95rem; }
+    .activity-mix { padding: 18px; border: 1px solid rgba(255,211,106,.18); border-radius: 14px; background: linear-gradient(135deg, rgba(54,44,24,.32), rgba(9,24,42,.8)); }.activity-mix h3 { margin: 0; color: var(--gold); font-size: .76rem; letter-spacing: .14em; }.activity-mix p { margin: 7px 0 13px; color: var(--muted); font-size: .77rem; }.mix-bar { display: flex; height: 12px; overflow: hidden; border: 1px solid rgba(117,184,223,.15); border-radius: 999px; background: #071524; }.mix-bar span { min-width: 0; transition: width .35s ease; }.mix-keyboard { background: #52e5f6; }.mix-click { background: #ffd36a; }.mix-cursor { background: #8ba8ff; }.mix-scroll { background: #5bea9c; }.mix-labels { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px 13px; margin: 14px 0 0; }.mix-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: .74rem; }.mix-label i { width: 8px; height: 8px; display: inline-block; margin-right: 6px; border-radius: 99px; background: var(--mix); }.mix-label strong { color: var(--text); font-size: .74rem; }
     .session { margin-top: 28px; padding: 19px; border: 1px solid rgba(82,229,246,.2); border-radius: 14px; background: linear-gradient(135deg, rgba(19,62,85,.55), rgba(9,24,42,.8)); }.session h3 { margin: 0 0 14px; color: var(--cyan); font-size: .76rem; letter-spacing: .14em; }.session dl { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin: 0; color: var(--muted); font-size: .86rem; }.session dd { margin: 0; color: var(--text); font-weight: 750; }.session .total-row { margin-top: 8px; padding-top: 13px; border-top: 1px solid var(--line); color: var(--gold); font-weight: 900; }
     .settings { padding: 20px 0 0; }.settings h2 { font-size: 1rem; }.settings p { color: var(--muted); line-height: 1.55; font-size: .84rem; }
     dialog { width: min(440px, calc(100% - 30px)); border: 1px solid var(--line); border-radius: 18px; color: var(--text); background: #0a1a2c; box-shadow: var(--shadow); } dialog::backdrop { background: rgba(1,5,12,.68); }
-    .online { padding: 4px; }.online h2 { margin: 0 0 5px; font-size: 1.1rem; }.online .hint { margin: 0 0 17px; color: var(--muted); font-size: .8rem; line-height: 1.45; }.online-status { margin: 13px 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); font-size: .82rem; }.online label { display: grid; gap: 6px; margin: 11px 0; color: #c3d9e9; font-size: .75rem; font-weight: 750; }.online input { width: 100%; padding: 10px; color: var(--text); border: 1px solid var(--line); border-radius: 9px; background: #071524; }.online .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }.online .leaderboard { margin: 14px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: .82rem; }.online .leaderboard li { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(117,184,223,.1); }.online .signed-out, .online .signed-in { display: none; }.online.signed-in .signed-in, .online.signed-out .signed-out { display: block; }
+    .online { padding: 4px; }.online h2 { margin: 0 0 5px; font-size: 1.1rem; }.online .hint { margin: 0 0 17px; color: var(--muted); font-size: .8rem; line-height: 1.45; }.online-status { margin: 13px 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); font-size: .82rem; }.online label { display: grid; gap: 6px; margin: 11px 0; color: #c3d9e9; font-size: .75rem; font-weight: 750; }.online input { width: 100%; padding: 10px; color: var(--text); border: 1px solid var(--line); border-radius: 9px; background: #071524; }.online .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }.leaderboard-title { margin: 21px 0 5px; color: var(--gold); font-size: .72rem; font-weight: 850; letter-spacing: .14em; }.online .leaderboard { margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: .82rem; }.online .leaderboard li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 2px; border-bottom: 1px solid rgba(117,184,223,.1); }.online .leaderboard li:first-child span { color: var(--gold); font-weight: 850; }.online .leaderboard strong { color: var(--text); }.online .signed-out, .online .signed-in { display: none; }.online.signed-in .signed-in, .online.signed-out .signed-out { display: block; }
 
-    @media (max-width: 760px) { .app { width: min(100% - 20px, 620px); padding-top: 10px; }.shell { border-radius: 18px; }.topbar { padding: 15px; }.brand p { display: none; }.main { min-height: 540px; padding: 43px 24px 170px; }.hero { grid-template-columns: 1fr; text-align: center; justify-items: center; gap: 25px; }.progress-line { text-align: left; }.activity-toggle { top: auto; right: 24px; bottom: 29px; left: 24px; width: auto; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0 10px; transform: none; }.activity-toggle:hover { transform: translateY(-2px); }.activity-toggle b { grid-row: span 2; margin: 0; }.activity-toggle .open-label { margin-top: 0; grid-column: 2; }.rewards { padding: 23px 24px; }.reward { grid-template-columns: 1fr auto; }.reward .bar { grid-column: span 2; grid-row: 2; }.footer { padding: 16px; }.footer p:first-child { display: none; }.drawer { width: 100%; border-left: 0; } }
+    @media (max-width: 760px) { .app { width: min(100% - 20px, 620px); padding-top: 10px; }.shell { border-radius: 18px; }.topbar { padding: 15px; }.brand p { display: none; }.main { min-height: 540px; padding: 43px 24px 170px; }.hero { grid-template-columns: 1fr; text-align: center; justify-items: center; gap: 25px; }.progress-line { text-align: left; }.identity-row { justify-content: center; }.activity-toggle { top: auto; right: 24px; bottom: 29px; left: 24px; width: auto; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0 10px; transform: none; }.activity-toggle:hover { transform: translateY(-2px); }.activity-toggle b { grid-row: span 2; margin: 0; }.activity-toggle .open-label { margin-top: 0; grid-column: 2; }.rewards { padding: 23px 24px; }.reward { grid-template-columns: 1fr auto; }.reward .bar { grid-column: span 2; grid-row: 2; }.footer { padding: 16px; }.footer p:first-child { display: none; }.drawer { width: 100%; border-left: 0; } }
   </style>
 </head>
 <body>
@@ -120,6 +124,7 @@
             <div class="xp-total"><span id="lifetimeXP">603</span> <small>XP</small></div>
             <div class="progress-line"><div class="bar"><span id="levelBar" style="width:60.3%"></span></div><span id="levelProgress">603 / 1,000 XP</span></div>
             <p class="until"><span id="remainingXP">397</span> XP until Level <span id="nextLevel">2</span></p>
+            <div class="identity-row"><span class="rank-chip" id="rankTitle">INITIATE</span><span class="signal-chip">SESSION <strong id="sessionPulse">+19 XP</strong></span></div>
           </div>
         </div>
         <button class="activity-toggle" id="activityButton" aria-controls="activityDrawer" aria-expanded="false"><span>TODAY</span><b id="todayXP">603 XP</b><span>Session <span id="sessionXP">+19 XP</span></span><span class="open-label">Details&nbsp; ‹</span></button>
@@ -144,11 +149,12 @@
       <article class="metric"><div class="metric-icon">↗</div><div><h3>Cursor travel</h3><p>Today <span id="cursorToday">91</span> XP &nbsp;•&nbsp; <span id="cursorGain">+2 this session</span></p></div><strong id="cursorValue">91 XP</strong></article>
       <article class="metric"><div class="metric-icon">⇅</div><div><h3>Scrolling</h3><p>Today <span id="scrollToday">104</span> XP &nbsp;•&nbsp; <span id="scrollGain">+0 this session</span></p></div><strong id="scrollValue">104 XP</strong></article>
     </div>
+    <section class="activity-mix" aria-labelledby="mixTitle"><h3 id="mixTitle">TODAY'S ACTIVITY MIX</h3><p id="mixSummary">Keyboard currently leads today's progress.</p><div class="mix-bar" aria-label="Today's XP by activity"><span class="mix-keyboard" id="keyboardMix" style="width:58%"></span><span class="mix-click" id="clickMix" style="width:10%"></span><span class="mix-cursor" id="cursorMix" style="width:15%"></span><span class="mix-scroll" id="scrollMix" style="width:17%"></span></div><div class="mix-labels"><span class="mix-label" style="--mix:#52e5f6"><span><i></i>Keyboard</span><strong id="keyboardMixValue">58%</strong></span><span class="mix-label" style="--mix:#ffd36a"><span><i></i>Clicks</span><strong id="clickMixValue">10%</strong></span><span class="mix-label" style="--mix:#8ba8ff"><span><i></i>Cursor</span><strong id="cursorMixValue">15%</strong></span><span class="mix-label" style="--mix:#5bea9c"><span><i></i>Scroll</span><strong id="scrollMixValue">17%</strong></span></div></section>
     <section class="session"><h3>CURRENT SESSION</h3><dl><dt>Keyboard</dt><dd id="sessionKeyboard">16 XP</dd><dt>Clicks</dt><dd id="sessionClick">1 XP</dd><dt>Cursor</dt><dd id="sessionCursor">2 XP</dd><dt>Scroll</dt><dd id="sessionScroll">0 XP</dd><dt class="total-row">Total</dt><dd class="total-row" id="sessionTotal">19 XP</dd></dl></section>
   </aside>
 
   <dialog id="settingsDialog"><section class="settings"><h2>Local-only dashboard</h2><p>Updates come from this Computer Warrior process at localhost. Only aggregate XP totals and progress remainders are sent to the dashboard; no typed text, key names, coordinates, or event history are exposed.</p><button class="button" id="closeSettings">Close</button></section></dialog>
-  <dialog id="onlineDialog"><section class="online signed-out" id="onlinePanel"><h2>Online profile</h2><p class="hint">The Python app owns your sign-in session. The browser never receives the session token; only anonymous aggregate XP is synced.</p><div class="online-status" id="onlineStatus">Checking local account status…</div><div class="signed-out"><label>Username<input id="onlineUsername" maxlength="24" autocomplete="username"></label><label>Password<input id="onlinePassword" type="password" minlength="10" autocomplete="current-password"></label><label>Beta invite code <span class="hint">(required only when creating a beta account)</span><input id="onlineInviteCode" type="password" maxlength="128" autocomplete="off"></label><label>Worker URL<input id="workerUrl" value="http://127.0.0.1:8787"></label><label>Device label<input id="deviceLabel" value="Computer Warrior device"></label><div class="row"><button class="button" id="registerButton">Create account</button><button class="button" id="loginButton">Sign in</button><button class="button" id="closeOnline">Close</button></div></div><div class="signed-in"><p class="hint" id="accountDetails"></p><div class="row"><button class="button pause" id="syncButton">Sync now</button><button class="button danger" id="logoutButton">Sign out</button><button class="button" id="closeOnlineSigned">Close</button></div><ol class="leaderboard" id="leaderboardList"></ol></div></section></dialog>
+  <dialog id="onlineDialog"><section class="online signed-out" id="onlinePanel"><h2>Online profile</h2><p class="hint">The Python app owns your sign-in session. The browser never receives the session token; only anonymous aggregate XP is synced.</p><div class="online-status" id="onlineStatus">Checking local account status…</div><div class="signed-out"><label>Username<input id="onlineUsername" maxlength="24" autocomplete="username"></label><label>Password<input id="onlinePassword" type="password" minlength="10" autocomplete="current-password"></label><label>Beta invite code <span class="hint">(required only when creating a beta account)</span><input id="onlineInviteCode" type="password" maxlength="128" autocomplete="off"></label><label>Worker URL<input id="workerUrl" value="http://127.0.0.1:8787"></label><label>Device label<input id="deviceLabel" value="Computer Warrior device"></label><div class="row"><button class="button" id="registerButton">Create account</button><button class="button" id="loginButton">Sign in</button><button class="button" id="closeOnline">Close</button></div></div><div class="signed-in"><p class="hint" id="accountDetails"></p><div class="row"><button class="button pause" id="syncButton">Sync now</button><button class="button danger" id="logoutButton">Sign out</button><button class="button" id="closeOnlineSigned">Close</button></div><h3 class="leaderboard-title">PRIVATE BETA LEADERBOARD</h3><ol class="leaderboard" id="leaderboardList"></ol></div></section></dialog>
 
   <script>
     const body = document.body;
@@ -181,6 +187,21 @@
       setText(`${name}Value`, `${fmt(daily)} XP`);
       setText(`session${name[0].toUpperCase()}${name.slice(1)}`, `${fmt(session)} XP`);
     }
+    function rankForLevel(level) {
+      const ranks = ['INITIATE', 'OPERATOR', 'PATHFINDER', 'BUILDER', 'VANGUARD', 'ARCHITECT', 'COMMANDER', 'LEGEND'];
+      return ranks[Math.min(Math.floor((level - 1) / 3), ranks.length - 1)];
+    }
+    function renderActivityMix(daily) {
+      const metrics = [['keyboard', 'Keyboard'], ['click', 'Mouse clicks'], ['cursor', 'Cursor travel'], ['scroll', 'Scrolling']];
+      const total = Math.max(Number(daily.total || 0), 0);
+      const leader = metrics.reduce((best, entry) => Number(daily[entry[0]] || 0) > Number(daily[best[0]] || 0) ? entry : best, metrics[0]);
+      metrics.forEach(([name]) => {
+        const percent = total ? Math.round((Number(daily[name] || 0) / total) * 100) : 0;
+        document.getElementById(`${name}Mix`).style.width = `${percent}%`;
+        setText(`${name}MixValue`, `${percent}%`);
+      });
+      setText('mixSummary', total ? `${leader[1]} leads today's progress.` : 'Earn XP to reveal today\'s activity mix.');
+    }
     function render(data) {
       const {session, daily, lifetime, progress, level} = data;
       setStatus(data.paused);
@@ -189,8 +210,10 @@
       setText('todayXP', `${fmt(daily.total)} XP`);
       setText('sessionXP', `+${fmt(session.total)} XP`);
       setText('drawerSession', `${fmt(session.total)} XP`);
+      setText('sessionPulse', `+${fmt(session.total)} XP`);
       setText('level', String(level.number).padStart(2, '0'));
       setText('nextLevel', level.number + 1);
+      setText('rankTitle', rankForLevel(level.number));
       setText('levelProgress', `${fmt(level.progress_xp)} / ${fmt(level.target_xp)} XP`);
       setText('remainingXP', fmt(level.remaining_xp));
       document.getElementById('levelBar').style.width = `${(level.progress_xp / level.target_xp) * 100}%`;
@@ -202,6 +225,7 @@
       updateMetric('click', daily.click, session.click);
       updateMetric('cursor', daily.cursor, session.cursor);
       updateMetric('scroll', daily.scroll, session.scroll);
+      renderActivityMix(daily);
       setText('sessionTotal', `${fmt(session.total)} XP`);
       setText('lastSaved', data.last_saved_at ? new Date(data.last_saved_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : 'Not saved yet');
     }

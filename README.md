@@ -1,6 +1,20 @@
-# Computer Warrior v0.0.7.2 — Cloudflare Free CPU Auth Hotfix
+# Computer Warrior v0.0.8 — Game Loop Dashboard
 
 A Windows-first activity game core that converts anonymous aggregate input activity into XP. It keeps the CLI dashboard and now also serves a live browser dashboard on this PC only.
+
+## v0.0.8 game-loop dashboard
+
+- Adds an earned rank title based only on the existing XP level.
+- Adds a live session pulse beside the level progress.
+- Adds a collapsed Activity Mix view showing the percentage split of today's
+  four aggregate XP categories.
+- Improves the online leaderboard hierarchy so the current top competitor is
+  easier to scan.
+- Keeps all detailed activity information in the existing collapsible panel;
+  no new activity data is recorded, uploaded, or retained.
+
+This is a local dashboard update. It needs no D1 migration, secret change, or
+Worker deployment.
 
 ## Private Cloudflare beta foundation
 

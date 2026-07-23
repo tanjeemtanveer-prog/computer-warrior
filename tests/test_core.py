@@ -283,6 +283,18 @@ class OnlineSyncTests(unittest.TestCase):
         self.assertIn("if (onlineDialog.open) await loadOnline();", page)
         self.assertIn("window.setInterval(refreshOpenOnlinePanel, 2000);", page)
 
+    def test_dashboard_game_loop_uses_only_existing_aggregate_metrics(self) -> None:
+        page_path = Path(__file__).resolve().parent.parent / "web" / "index.html"
+        page = page_path.read_text(encoding="utf-8")
+        self.assertIn('id="rankTitle"', page)
+        self.assertIn('id="sessionPulse"', page)
+        self.assertIn('id="mixSummary"', page)
+        self.assertIn("function rankForLevel(level)", page)
+        self.assertIn("function renderActivityMix(daily)", page)
+        self.assertIn("[['keyboard', 'Keyboard'], ['click', 'Mouse clicks'], ['cursor', 'Cursor travel'], ['scroll', 'Scrolling']]", page)
+        self.assertNotIn("key_sequence", page.lower())
+        self.assertNotIn("cursor_position", page.lower())
+
     def test_online_refresh_route_returns_json_instead_of_an_html_404(self) -> None:
         with tempfile.TemporaryDirectory() as folder:
             tracker = ActivityTracker(AtomicJsonStore(Path(folder) / "stats.json"))

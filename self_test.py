@@ -68,6 +68,7 @@ def main() -> int:
 - Beta dashboard invite field and private Worker configuration separation.
 - Cloudflare-compatible User-Agent on Python Worker requests.
 - Workers Free CPU-compatible beta password work factor.
+- Local dashboard rank, session-pulse and aggregate activity-mix UI contract.
 - Direct loading of v0.0.1-hotfix.1 schema-version-1 stats without XP loss.
 
 ## Test runner output
