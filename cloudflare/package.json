@@ -1,0 +1,15 @@
+{
+  "name": "computer-warrior-cloudflare-local",
+  "private": true,
+  "version": "0.0.6",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --local --port 8787",
+    "db:migrate": "wrangler d1 migrations apply computer-warrior-local --local",
+    "check": "node --check src/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

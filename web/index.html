@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <title>Computer Warrior</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: rgba(12, 28, 47, .82);
+      --panel-bright: rgba(17, 42, 68, .88);
+      --line: rgba(117, 184, 223, .19);
+      --text: #edf8ff;
+      --muted: #91a8bc;
+      --cyan: #52e5f6;
+      --cyan-dark: #0bb8d1;
+      --gold: #ffd36a;
+      --green: #5bea9c;
+      --amber: #ffc467;
+      --red: #ff7788;
+      --shadow: 0 22px 60px rgba(0, 0, 0, .36);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(37, 162, 205, .16), transparent 32rem),
+        radial-gradient(circle at 84% 80%, rgba(48, 91, 184, .18), transparent 30rem),
+        linear-gradient(145deg, #050a13 0%, var(--bg) 52%, #080d1d 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .3;
+      background-image: linear-gradient(rgba(99, 179, 224, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 179, 224, .04) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, #000, transparent 86%);
+    }
+
+    button { font: inherit; }
+    .app { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 36px; }
+    .shell { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 24px; background: rgba(5, 15, 29, .72); box-shadow: var(--shadow); }
+
+    .topbar, .footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 19px 24px; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; gap: 13px; align-items: center; min-width: 0; }
+    .brand-mark { width: 39px; height: 39px; display: grid; place-items: center; flex: 0 0 auto; font-weight: 900; letter-spacing: -1px; color: #06111d; background: linear-gradient(135deg, var(--cyan), #84f5ff); clip-path: polygon(50% 0, 100% 21%, 91% 78%, 50% 100%, 9% 78%, 0 21%); }
+    .brand h1 { margin: 0; font-size: .96rem; letter-spacing: .14em; }
+    .brand p { margin: 4px 0 0; color: var(--muted); font-size: .76rem; }
+    .top-actions { display: flex; align-items: center; gap: 12px; }
+    .status { display: flex; align-items: center; gap: 8px; color: var(--green); font-size: .75rem; font-weight: 800; letter-spacing: .07em; white-space: nowrap; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 14px currentColor; }
+    .icon-button, .button { border: 1px solid var(--line); border-radius: 10px; color: var(--text); background: rgba(255,255,255,.04); cursor: pointer; transition: .18s ease; }
+    .icon-button { width: 36px; height: 36px; font-size: 1.15rem; }
+    .icon-button:hover, .button:hover { transform: translateY(-1px); border-color: rgba(82,229,246,.55); background: rgba(82,229,246,.1); }
+
+    .main { padding: clamp(24px, 5vw, 58px); min-height: 530px; display: grid; place-items: center; }
+    .hero { width: min(700px, 100%); display: grid; grid-template-columns: 190px 1fr; align-items: center; gap: clamp(25px, 5vw, 55px); }
+    .avatar { position: relative; width: 184px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 38% 62% 57% 43% / 42% 44% 56% 58%; background: radial-gradient(circle at 47% 35%, rgba(154,249,255,.7) 0 4%, transparent 4.5%), radial-gradient(circle at 50% 40%, #143851 0 27%, #0b2137 28% 44%, #061322 45%); border: 1px solid rgba(82,229,246,.45); box-shadow: inset 0 0 38px rgba(50,213,239,.18), 0 0 46px rgba(24,175,210,.22); }
+    .avatar::before { content: ""; position: absolute; inset: -12px; border: 1px solid rgba(82,229,246,.16); border-radius: inherit; transform: rotate(-9deg); }
+    .avatar span { margin-top: 87px; color: var(--cyan); font-size: .82rem; font-weight: 900; letter-spacing: .18em; text-shadow: 0 0 14px var(--cyan); }
+    .eyebrow { margin: 0 0 7px; color: var(--gold); font-size: .72rem; font-weight: 850; letter-spacing: .2em; }
+    .hero h2 { margin: 0; font-size: clamp(1.45rem, 3vw, 2.25rem); letter-spacing: .025em; }
+    .xp-total { margin: 18px 0 8px; font-size: clamp(2.4rem, 6vw, 4.1rem); line-height: .9; font-weight: 900; letter-spacing: -.07em; color: var(--gold); text-shadow: 0 0 22px rgba(255,211,106,.2); }
+    .xp-total small { font-size: .86rem; letter-spacing: .08em; }
+    .progress-line { display: flex; align-items: center; gap: 11px; margin-top: 19px; color: var(--muted); font-size: .8rem; }
+    .bar { height: 10px; flex: 1; overflow: hidden; border: 1px solid rgba(117,184,223,.16); border-radius: 50px; background: #071524; }
+    .bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--cyan-dark), var(--cyan)); box-shadow: 0 0 18px rgba(82,229,246,.7); }
+    .until { margin: 11px 0 0; color: var(--muted); font-size: .84rem; }
+
+    .activity-toggle { position: absolute; right: 24px; top: 50%; width: 134px; padding: 16px 14px; transform: translateY(-50%); text-align: left; color: var(--text); border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(145deg, rgba(23,57,87,.84), rgba(8,24,42,.94)); box-shadow: 0 12px 30px rgba(0,0,0,.2); cursor: pointer; transition: .2s ease; }
+    .activity-toggle:hover { border-color: rgba(82,229,246,.64); transform: translateY(-50%) translateX(-3px); }
+    .activity-toggle b, .activity-toggle span { display: block; }
+    .activity-toggle b { font-size: 1.24rem; color: var(--gold); margin: 6px 0 3px; }
+    .activity-toggle span { color: var(--muted); font-size: .75rem; }
+    .activity-toggle .open-label { margin-top: 13px; color: var(--cyan); font-weight: 800; }
+
+    .rewards { padding: 24px clamp(24px, 5vw, 58px) 30px; border-top: 1px solid var(--line); }
+    .section-title { margin: 0 0 21px; font-size: .76rem; letter-spacing: .16em; color: var(--muted); }
+    .reward { display: grid; grid-template-columns: 145px 1fr auto; gap: 14px; align-items: center; margin-top: 15px; font-size: .84rem; }
+    .reward label { color: #c3d9e9; }.reward output { color: var(--muted); font-size: .78rem; }
+    .footer { border-top: 1px solid var(--line); border-bottom: 0; flex-wrap: wrap; color: var(--muted); font-size: .77rem; }
+    .footer p { margin: 0; }.controls { display: flex; gap: 8px; }.button { padding: 8px 13px; font-size: .78rem; font-weight: 800; }.button.danger { color: #ffc1c9; }.button.pause { color: #d5fff0; border-color: rgba(91,234,156,.3); }
+
+    .drawer-backdrop { position: fixed; z-index: 5; inset: 0; pointer-events: none; opacity: 0; background: rgba(1,5,12,.54); transition: opacity .25s ease; }
+    .drawer { position: fixed; z-index: 6; top: 0; right: 0; width: min(420px, 100%); height: 100dvh; padding: 23px; transform: translateX(100%); border-left: 1px solid var(--line); background: #091729; box-shadow: -25px 0 70px rgba(0,0,0,.35); transition: transform .3s cubic-bezier(.2,.9,.2,1); overflow-y: auto; }
+    body.drawer-open { overflow: hidden; } body.drawer-open .drawer { transform: none; } body.drawer-open .drawer-backdrop { opacity: 1; pointer-events: auto; }
+    .drawer-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }.drawer-header h2 { margin: 0; font-size: 1.1rem; letter-spacing: .1em; }.drawer-header p { margin: 7px 0 0; color: var(--gold); font-weight: 800; font-size: .84rem; }
+    .metrics { display: grid; gap: 11px; margin: 22px 0; }.metric { padding: 16px; display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); }.metric-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 11px; color: var(--cyan); background: rgba(82,229,246,.08); font-size: 1.2rem; }.metric h3 { margin: 0; font-size: .9rem; }.metric p { margin: 4px 0 0; color: var(--muted); font-size: .75rem; }.metric strong { color: var(--gold); font-size: .95rem; }
+    .session { margin-top: 28px; padding: 19px; border: 1px solid rgba(82,229,246,.2); border-radius: 14px; background: linear-gradient(135deg, rgba(19,62,85,.55), rgba(9,24,42,.8)); }.session h3 { margin: 0 0 14px; color: var(--cyan); font-size: .76rem; letter-spacing: .14em; }.session dl { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin: 0; color: var(--muted); font-size: .86rem; }.session dd { margin: 0; color: var(--text); font-weight: 750; }.session .total-row { margin-top: 8px; padding-top: 13px; border-top: 1px solid var(--line); color: var(--gold); font-weight: 900; }
+    .settings { padding: 20px 0 0; }.settings h2 { font-size: 1rem; }.settings p { color: var(--muted); line-height: 1.55; font-size: .84rem; }
+    dialog { width: min(440px, calc(100% - 30px)); border: 1px solid var(--line); border-radius: 18px; color: var(--text); background: #0a1a2c; box-shadow: var(--shadow); } dialog::backdrop { background: rgba(1,5,12,.68); }
+    .online { padding: 4px; }.online h2 { margin: 0 0 5px; font-size: 1.1rem; }.online .hint { margin: 0 0 17px; color: var(--muted); font-size: .8rem; line-height: 1.45; }.online-status { margin: 13px 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); font-size: .82rem; }.online label { display: grid; gap: 6px; margin: 11px 0; color: #c3d9e9; font-size: .75rem; font-weight: 750; }.online input { width: 100%; padding: 10px; color: var(--text); border: 1px solid var(--line); border-radius: 9px; background: #071524; }.online .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }.online .leaderboard { margin: 14px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: .82rem; }.online .leaderboard li { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(117,184,223,.1); }.online .signed-out, .online .signed-in { display: none; }.online.signed-in .signed-in, .online.signed-out .signed-out { display: block; }
+
+    @media (max-width: 760px) { .app { width: min(100% - 20px, 620px); padding-top: 10px; }.shell { border-radius: 18px; }.topbar { padding: 15px; }.brand p { display: none; }.main { min-height: 540px; padding: 43px 24px 170px; }.hero { grid-template-columns: 1fr; text-align: center; justify-items: center; gap: 25px; }.progress-line { text-align: left; }.activity-toggle { top: auto; right: 24px; bottom: 29px; left: 24px; width: auto; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0 10px; transform: none; }.activity-toggle:hover { transform: translateY(-2px); }.activity-toggle b { grid-row: span 2; margin: 0; }.activity-toggle .open-label { margin-top: 0; grid-column: 2; }.rewards { padding: 23px 24px; }.reward { grid-template-columns: 1fr auto; }.reward .bar { grid-column: span 2; grid-row: 2; }.footer { padding: 16px; }.footer p:first-child { display: none; }.drawer { width: 100%; border-left: 0; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <main class="shell" aria-label="Computer Warrior dashboard">
+      <header class="topbar">
+        <div class="brand"><div class="brand-mark">CW</div><div><h1>COMPUTER WARRIOR</h1><p>Your effort becomes progress.</p></div></div>
+        <div class="top-actions"><div class="status" id="status"><i class="status-dot"></i><span>TRACKING ACTIVE</span></div><button class="button" id="onlineButton">Online</button><button class="icon-button" id="settingsButton" aria-label="Open settings">⚙</button></div>
+      </header>
+
+      <section class="main">
+        <div class="hero">
+          <div class="avatar" aria-label="Computer Warrior avatar"><span>WARRIOR</span></div>
+          <div>
+            <p class="eyebrow">LEVEL <span id="level">01</span></p>
+            <h2>COMPUTER WARRIOR</h2>
+            <div class="xp-total"><span id="lifetimeXP">603</span> <small>XP</small></div>
+            <div class="progress-line"><div class="bar"><span id="levelBar" style="width:60.3%"></span></div><span id="levelProgress">603 / 1,000 XP</span></div>
+            <p class="until"><span id="remainingXP">397</span> XP until Level <span id="nextLevel">2</span></p>
+          </div>
+        </div>
+        <button class="activity-toggle" id="activityButton" aria-controls="activityDrawer" aria-expanded="false"><span>TODAY</span><b id="todayXP">603 XP</b><span>Session <span id="sessionXP">+19 XP</span></span><span class="open-label">Details&nbsp; ‹</span></button>
+      </section>
+
+      <section class="rewards" aria-labelledby="rewardsTitle">
+        <h2 class="section-title" id="rewardsTitle">NEXT REWARDS</h2>
+        <div class="reward"><label for="cursorBar">Cursor distance</label><div class="bar" id="cursorBar"><span id="cursorBarFill" style="width:62.87%"></span></div><output id="cursorProgress">628.7 / 1,000 pixels</output></div>
+        <div class="reward"><label for="scrollBar">Scroll steps</label><div class="bar" id="scrollBar"><span id="scrollBarFill" style="width:0%"></span></div><output id="scrollProgress">0 / 10 steps</output></div>
+      </section>
+
+      <footer class="footer"><p>Lifetime: <strong id="footerLifetime">603 XP</strong> &nbsp;·&nbsp; Last saved: <span id="lastSaved">Just now</span></p><p>Only anonymous aggregate XP totals are stored locally.</p><div class="controls"><button class="button pause" id="pauseButton">Pause</button><button class="button danger" id="exitButton">Exit</button></div></footer>
+    </main>
+  </div>
+
+  <div class="drawer-backdrop" id="backdrop"></div>
+  <aside class="drawer" id="activityDrawer" aria-label="Today's activity" aria-hidden="true">
+    <header class="drawer-header"><div><h2>TODAY'S ACTIVITY</h2><p>Session: <span id="drawerSession">19 XP</span></p></div><button class="icon-button" id="closeDrawer" aria-label="Close activity details">×</button></header>
+    <div class="metrics">
+      <article class="metric"><div class="metric-icon">⌨</div><div><h3>Keyboard</h3><p>Today <span id="keyboardToday">348</span> XP &nbsp;•&nbsp; <span id="keyboardGain">+16 this session</span></p></div><strong id="keyboardValue">348 XP</strong></article>
+      <article class="metric"><div class="metric-icon">◉</div><div><h3>Mouse clicks</h3><p>Today <span id="clickToday">60</span> XP &nbsp;•&nbsp; <span id="clickGain">+1 this session</span></p></div><strong id="clickValue">60 XP</strong></article>
+      <article class="metric"><div class="metric-icon">↗</div><div><h3>Cursor travel</h3><p>Today <span id="cursorToday">91</span> XP &nbsp;•&nbsp; <span id="cursorGain">+2 this session</span></p></div><strong id="cursorValue">91 XP</strong></article>
+      <article class="metric"><div class="metric-icon">⇅</div><div><h3>Scrolling</h3><p>Today <span id="scrollToday">104</span> XP &nbsp;•&nbsp; <span id="scrollGain">+0 this session</span></p></div><strong id="scrollValue">104 XP</strong></article>
+    </div>
+    <section class="session"><h3>CURRENT SESSION</h3><dl><dt>Keyboard</dt><dd id="sessionKeyboard">16 XP</dd><dt>Clicks</dt><dd id="sessionClick">1 XP</dd><dt>Cursor</dt><dd id="sessionCursor">2 XP</dd><dt>Scroll</dt><dd id="sessionScroll">0 XP</dd><dt class="total-row">Total</dt><dd class="total-row" id="sessionTotal">19 XP</dd></dl></section>
+  </aside>
+
+  <dialog id="settingsDialog"><section class="settings"><h2>Local-only dashboard</h2><p>Updates come from this Computer Warrior process at localhost. Only aggregate XP totals and progress remainders are sent to the dashboard; no typed text, key names, coordinates, or event history are exposed.</p><button class="button" id="closeSettings">Close</button></section></dialog>
+  <dialog id="onlineDialog"><section class="online signed-out" id="onlinePanel"><h2>Online profile</h2><p class="hint">The Python app owns your sign-in session. The browser never receives the session token; only anonymous aggregate XP is synced.</p><div class="online-status" id="onlineStatus">Checking local account status…</div><div class="signed-out"><label>Username<input id="onlineUsername" maxlength="24" autocomplete="username"></label><label>Password<input id="onlinePassword" type="password" minlength="10" autocomplete="current-password"></label><label>Local Worker URL<input id="workerUrl" value="http://127.0.0.1:8787"></label><label>Device label<input id="deviceLabel" value="Computer Warrior device"></label><div class="row"><button class="button" id="registerButton">Create account</button><button class="button" id="loginButton">Sign in</button><button class="button" id="closeOnline">Close</button></div></div><div class="signed-in"><p class="hint" id="accountDetails"></p><div class="row"><button class="button pause" id="syncButton">Sync now</button><button class="button danger" id="logoutButton">Sign out</button><button class="button" id="closeOnlineSigned">Close</button></div><ol class="leaderboard" id="leaderboardList"></ol></div></section></dialog>
+
+  <script>
+    const body = document.body;
+    const drawer = document.getElementById('activityDrawer');
+    const activityButton = document.getElementById('activityButton');
+    function setDrawer(open) {
+      body.classList.toggle('drawer-open', open);
+      drawer.setAttribute('aria-hidden', String(!open));
+      activityButton.setAttribute('aria-expanded', String(open));
+      if (open) document.getElementById('closeDrawer').focus();
+      else activityButton.focus();
+    }
+    activityButton.addEventListener('click', () => setDrawer(true));
+    document.getElementById('closeDrawer').addEventListener('click', () => setDrawer(false));
+    document.getElementById('backdrop').addEventListener('click', () => setDrawer(false));
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && body.classList.contains('drawer-open')) setDrawer(false); });
+
+    const fmt = value => new Intl.NumberFormat().format(Number(value || 0));
+    const setText = (id, value) => { document.getElementById(id).textContent = value; };
+    function setStatus(paused, online = true) {
+      const status = document.getElementById('status');
+      status.style.color = !online ? 'var(--red)' : paused ? 'var(--amber)' : 'var(--green)';
+      status.querySelector('span').textContent = !online ? 'TRACKER OFFLINE' : paused ? 'TRACKING PAUSED' : 'TRACKING ACTIVE';
+      pauseButton.textContent = paused ? 'Resume' : 'Pause';
+      pauseButton.disabled = !online;
+    }
+    function updateMetric(name, daily, session) {
+      setText(`${name}Today`, fmt(daily));
+      setText(`${name}Gain`, `+${fmt(session)} this session`);
+      setText(`${name}Value`, `${fmt(daily)} XP`);
+      setText(`session${name[0].toUpperCase()}${name.slice(1)}`, `${fmt(session)} XP`);
+    }
+    function render(data) {
+      const {session, daily, lifetime, progress, level} = data;
+      setStatus(data.paused);
+      setText('lifetimeXP', fmt(lifetime.total));
+      setText('footerLifetime', `${fmt(lifetime.total)} XP`);
+      setText('todayXP', `${fmt(daily.total)} XP`);
+      setText('sessionXP', `+${fmt(session.total)} XP`);
+      setText('drawerSession', `${fmt(session.total)} XP`);
+      setText('level', String(level.number).padStart(2, '0'));
+      setText('nextLevel', level.number + 1);
+      setText('levelProgress', `${fmt(level.progress_xp)} / ${fmt(level.target_xp)} XP`);
+      setText('remainingXP', fmt(level.remaining_xp));
+      document.getElementById('levelBar').style.width = `${(level.progress_xp / level.target_xp) * 100}%`;
+      document.getElementById('cursorBarFill').style.width = `${(progress.cursor_pixels / progress.cursor_target) * 100}%`;
+      document.getElementById('scrollBarFill').style.width = `${(progress.scroll_steps / progress.scroll_target) * 100}%`;
+      setText('cursorProgress', `${progress.cursor_pixels.toFixed(1)} / ${fmt(progress.cursor_target)} pixels`);
+      setText('scrollProgress', `${progress.scroll_steps.toFixed(1)} / ${fmt(progress.scroll_target)} steps`);
+      updateMetric('keyboard', daily.keyboard, session.keyboard);
+      updateMetric('click', daily.click, session.click);
+      updateMetric('cursor', daily.cursor, session.cursor);
+      updateMetric('scroll', daily.scroll, session.scroll);
+      setText('sessionTotal', `${fmt(session.total)} XP`);
+      setText('lastSaved', data.last_saved_at ? new Date(data.last_saved_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : 'Not saved yet');
+    }
+    async function loadStats() {
+      try {
+        const response = await fetch('/api/stats', {cache: 'no-store'});
+        if (!response.ok) throw new Error('Stats request failed');
+        render(await response.json());
+      } catch (_) { setStatus(false, false); }
+    }
+    async function control(action) {
+      try {
+        const response = await fetch(`/api/control/${action}`, {method: 'POST'});
+        if (!response.ok) throw new Error('Control request failed');
+        render(await response.json());
+      } catch (_) { setStatus(false, false); }
+    }
+    const pauseButton = document.getElementById('pauseButton');
+    pauseButton.addEventListener('click', () => control(pauseButton.textContent === 'Pause' ? 'pause' : 'resume'));
+    document.getElementById('exitButton').addEventListener('click', () => control('exit'));
+    const settings = document.getElementById('settingsDialog');
+    document.getElementById('settingsButton').addEventListener('click', () => settings.showModal());
+    document.getElementById('closeSettings').addEventListener('click', () => settings.close());
+    const onlineDialog = document.getElementById('onlineDialog');
+    const onlinePanel = document.getElementById('onlinePanel');
+    const onlineStatus = document.getElementById('onlineStatus');
+    function renderOnline(data) {
+      onlinePanel.classList.toggle('signed-in', Boolean(data.signed_in));
+      onlinePanel.classList.toggle('signed-out', !data.signed_in);
+      if (data.signed_in) {
+        const totals = data.account_totals?.verified_total ?? 0;
+        document.getElementById('accountDetails').textContent = `${data.username} • verified account XP ${fmt(totals)} • ${fmt(data.pending_xp || 0)} XP pending in ${data.pending_count} batch(es)`;
+        document.getElementById('leaderboardList').innerHTML = (data.leaderboard || []).map(entry => `<li><span>#${entry.rank} ${entry.username}</span><strong>${fmt(entry.verified_total)} XP</strong></li>`).join('') || '<li>No verified leaderboard XP yet.</li>';
+      }
+      onlineStatus.textContent = data.last_error ? `Sync waiting: ${data.last_error}` : data.signed_in ? (data.pending_count ? `${fmt(data.pending_xp || 0)} XP waiting to sync` : `Synced ${data.last_synced_at ? new Date(data.last_synced_at).toLocaleTimeString() : 'locally'}`) : 'Sign in to connect this local device.';
+    }
+    async function onlineRequest(path, payload) {
+      const response = await fetch(path, {method: payload ? 'POST' : 'GET', headers: payload ? {'Content-Type':'application/json'} : {}, body: payload ? JSON.stringify(payload) : undefined});
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Online request failed');
+      renderOnline(data);
+      return data;
+    }
+    async function loadOnline() { try { await onlineRequest('/api/online'); } catch (error) { onlineStatus.textContent = error.message; } }
+    async function refreshOpenOnlinePanel() {
+      if (onlineDialog.open) await loadOnline();
+    }
+    document.getElementById('onlineButton').addEventListener('click', async () => { onlineDialog.showModal(); await loadOnline(); try { await onlineRequest('/api/online/refresh', {}); } catch (error) { onlineStatus.textContent = error.message; } });
+    document.getElementById('closeOnline').addEventListener('click', () => onlineDialog.close());
+    document.getElementById('closeOnlineSigned').addEventListener('click', () => onlineDialog.close());
+    function credentials() { return {username: document.getElementById('onlineUsername').value.trim(), password: document.getElementById('onlinePassword').value, worker_url: document.getElementById('workerUrl').value.trim(), device_label: document.getElementById('deviceLabel').value.trim()}; }
+    document.getElementById('registerButton').addEventListener('click', async () => { try { await onlineRequest('/api/online/register', credentials()); document.getElementById('onlinePassword').value = ''; } catch (error) { onlineStatus.textContent = error.message; } });
+    document.getElementById('loginButton').addEventListener('click', async () => { try { await onlineRequest('/api/online/login', credentials()); document.getElementById('onlinePassword').value = ''; } catch (error) { onlineStatus.textContent = error.message; } });
+    document.getElementById('syncButton').addEventListener('click', async () => { try { await onlineRequest('/api/online/sync', {}); } catch (error) { onlineStatus.textContent = error.message; } });
+    document.getElementById('logoutButton').addEventListener('click', async () => { try { await onlineRequest('/api/online/logout', {}); } catch (error) { onlineStatus.textContent = error.message; } });
+    loadStats();
+    window.setInterval(loadStats, 500);
+    window.setInterval(refreshOpenOnlinePanel, 2000);
+  </script>
+</body>
+</html>

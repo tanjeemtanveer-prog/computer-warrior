@@ -1,0 +1,23 @@
+# Python runtime and test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Local Computer Warrior state (normally stored in %LOCALAPPDATA%)
+stats.json
+stats.json.bak
+online_sync.json
+*.tmp
+
+# Cloudflare/Wrangler local dependencies and secrets
+cloudflare/node_modules/
+cloudflare/.wrangler/
+cloudflare/.dev.vars
+cloudflare/.env
+
+# Generated releases and archives
+release/
+release_*/
+*.zip
