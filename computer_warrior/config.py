@@ -1,15 +1,19 @@
-"""Configuration constants for Computer Warrior v0.0.8."""
+"""Configuration constants for Computer Warrior v0.0.9."""
 
 from __future__ import annotations
 
 APP_NAME = "Computer Warrior"
-APP_VERSION = "0.0.8"
+APP_VERSION = "0.0.9"
 SCHEMA_VERSION = 1
 
 KEYBOARD_XP_PER_PRESS = 1
 CLICK_XP_PER_PRESS = 1
 PIXELS_PER_CURSOR_XP = 1000.0
 SCROLL_STEPS_PER_XP = 10.0
+DEFAULT_DAILY_GOAL_XP = 500
+MIN_DAILY_GOAL_XP = 50
+MAX_DAILY_GOAL_XP = 50_000
+DAILY_HISTORY_DAYS = 7
 MAX_SINGLE_CURSOR_JUMP_PIXELS = 5000.0
 SAVE_INTERVAL_SECONDS = 10.0
 STATUS_INTERVAL_SECONDS = 1.0

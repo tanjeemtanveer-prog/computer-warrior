@@ -1,12 +1,12 @@
-# Computer Warrior v0.0.8 Automated QA Notes
+# Computer Warrior v0.0.9 Automated QA Notes
 
 - Result: **PASS**
-- Generated: 2026-07-23T07:07:38.019941+00:00
+- Generated: 2026-07-23T07:25:26.335931+00:00
 - Python: 3.13.2
 - Platform: Windows-11-10.0.26200-SP0
 - pynput in test environment: 1.8.2
 - Required Windows runtime dependency: pynput 1.8.2+
-- Tests run: 31
+- Tests run: 35
 - Failures: 0
 - Errors: 0
 - Skipped: 0
@@ -36,6 +36,7 @@
 - Cloudflare-compatible User-Agent on Python Worker requests.
 - Workers Free CPU-compatible beta password work factor.
 - Local dashboard rank, session-pulse and aggregate activity-mix UI contract.
+- Local daily-goal validation, streak calculation and seven-day aggregate history.
 - Direct loading of v0.0.1-hotfix.1 schema-version-1 stats without XP loss.
 
 ## Test runner output
@@ -48,7 +49,9 @@ test_dashboard_visibly_changes_to_paused (test_core.DashboardTests.test_dashboar
 test_live_dashboard_rewrites_fixed_rows_and_skips_duplicates (test_core.DashboardTests.test_live_dashboard_rewrites_fixed_rows_and_skips_duplicates) ... ok
 test_web_payload_exposes_only_aggregate_dashboard_values (test_core.DashboardTests.test_web_payload_exposes_only_aggregate_dashboard_values) ... ok
 test_beta_invite_code_is_sent_for_registration_but_not_saved (test_core.OnlineSyncTests.test_beta_invite_code_is_sent_for_registration_but_not_saved) ... ok
+test_daily_goal_route_persists_only_a_local_aggregate_setting (test_core.OnlineSyncTests.test_daily_goal_route_persists_only_a_local_aggregate_setting) ... ok
 test_dashboard_contains_a_beta_invite_field (test_core.OnlineSyncTests.test_dashboard_contains_a_beta_invite_field) ... ok
+test_dashboard_contains_local_daily_goal_and_history_controls (test_core.OnlineSyncTests.test_dashboard_contains_local_daily_goal_and_history_controls) ... ok
 test_dashboard_game_loop_uses_only_existing_aggregate_metrics (test_core.OnlineSyncTests.test_dashboard_game_loop_uses_only_existing_aggregate_metrics) ... ok
 test_new_xp_is_queued_once_then_synced_once (test_core.OnlineSyncTests.test_new_xp_is_queued_once_then_synced_once) ... ok
 test_normal_sync_batches_five_minutes_without_leaderboard_polling (test_core.OnlineSyncTests.test_normal_sync_batches_five_minutes_without_leaderboard_polling) ... ok
@@ -64,6 +67,8 @@ test_v001_stats_file_loads_without_migration_or_xp_loss (test_core.PersistenceTe
 test_click_counts_press_only (test_core.TrackerTests.test_click_counts_press_only) ... ok
 test_control_keys_toggle_and_quit_without_xp (test_core.TrackerTests.test_control_keys_toggle_and_quit_without_xp) ... ok
 test_cursor_distance_uses_remainder_and_rejects_jump (test_core.TrackerTests.test_cursor_distance_uses_remainder_and_rejects_jump) ... ok
+test_daily_goal_and_aggregate_history_survive_rollover_and_save (test_core.TrackerTests.test_daily_goal_and_aggregate_history_survive_rollover_and_save) ... ok
+test_daily_goal_rejects_values_outside_safe_range (test_core.TrackerTests.test_daily_goal_rejects_values_outside_safe_range) ... ok
 test_held_key_repeat_is_suppressed (test_core.TrackerTests.test_held_key_repeat_is_suppressed) ... ok
 test_injected_events_are_ignored (test_core.TrackerTests.test_injected_events_are_ignored) ... ok
 test_pause_resume_blocks_all_xp (test_core.TrackerTests.test_pause_resume_blocks_all_xp) ... ok
@@ -74,7 +79,7 @@ test_session_daily_lifetime_and_daily_rollover (test_core.TrackerTests.test_sess
 test_second_instance_is_rejected (test_core.WindowsMutexTests.test_second_instance_is_rejected) ... ok
 
 ----------------------------------------------------------------------
-Ran 31 tests in 1.025s
+Ran 35 tests in 1.546s
 
 OK
 ```

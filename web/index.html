@@ -90,6 +90,7 @@
     .section-title { margin: 0 0 21px; font-size: .76rem; letter-spacing: .16em; color: var(--muted); }
     .reward { display: grid; grid-template-columns: 145px 1fr auto; gap: 14px; align-items: center; margin-top: 15px; font-size: .84rem; }
     .reward label { color: #c3d9e9; }.reward output { color: var(--muted); font-size: .78rem; }
+    .momentum { padding: 26px clamp(24px, 5vw, 58px) 31px; border-top: 1px solid var(--line); }.momentum-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }.momentum-head p { margin: 0 0 21px; color: var(--muted); font-size: .78rem; }.mission-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(230px, .74fr); gap: 17px; }.goal-card, .history-card { padding: 18px; border: 1px solid var(--line); border-radius: 15px; background: var(--panel); }.goal-kicker, .history-card h3 { margin: 0; color: var(--gold); font-size: .72rem; font-weight: 850; letter-spacing: .13em; }.goal-number { margin: 9px 0 8px; color: var(--text); font-size: 1.42rem; font-weight: 900; letter-spacing: -.04em; }.goal-number strong { color: var(--gold); }.goal-copy { margin: 10px 0 0; color: var(--muted); font-size: .78rem; }.goal-card .bar { margin-top: 12px; }.goal-card .bar span { background: linear-gradient(90deg, #f3a955, var(--gold)); box-shadow: 0 0 18px rgba(255,211,106,.55); }.achievement-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }.achievement { padding: 5px 8px; border: 1px solid rgba(91,234,156,.27); border-radius: 999px; color: var(--green); background: rgba(91,234,156,.06); font-size: .67rem; font-weight: 850; letter-spacing: .06em; }.history-card h3 { color: var(--cyan); }.history-card p { margin: 7px 0 13px; color: var(--muted); font-size: .74rem; }.history-bars { height: 88px; display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: 7px; }.history-day { display: grid; grid-template-rows: 1fr auto; align-items: end; gap: 7px; min-width: 0; }.history-fill { width: 100%; min-height: 4px; border-radius: 5px 5px 2px 2px; background: linear-gradient(to top, var(--cyan-dark), var(--cyan)); box-shadow: 0 0 12px rgba(82,229,246,.24); transition: height .35s ease; }.history-day.today .history-fill { background: linear-gradient(to top, #f3a955, var(--gold)); }.history-day span { overflow: hidden; color: var(--muted); font-size: .64rem; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
     .footer { border-top: 1px solid var(--line); border-bottom: 0; flex-wrap: wrap; color: var(--muted); font-size: .77rem; }
     .footer p { margin: 0; }.controls { display: flex; gap: 8px; }.button { padding: 8px 13px; font-size: .78rem; font-weight: 800; }.button.danger { color: #ffc1c9; }.button.pause { color: #d5fff0; border-color: rgba(91,234,156,.3); }
 
@@ -100,11 +101,11 @@
     .metrics { display: grid; gap: 11px; margin: 22px 0; }.metric { padding: 16px; display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); }.metric-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 11px; color: var(--cyan); background: rgba(82,229,246,.08); font-size: 1.2rem; }.metric h3 { margin: 0; font-size: .9rem; }.metric p { margin: 4px 0 0; color: var(--muted); font-size: .75rem; }.metric strong { color: var(--gold); font-size: .95rem; }
     .activity-mix { padding: 18px; border: 1px solid rgba(255,211,106,.18); border-radius: 14px; background: linear-gradient(135deg, rgba(54,44,24,.32), rgba(9,24,42,.8)); }.activity-mix h3 { margin: 0; color: var(--gold); font-size: .76rem; letter-spacing: .14em; }.activity-mix p { margin: 7px 0 13px; color: var(--muted); font-size: .77rem; }.mix-bar { display: flex; height: 12px; overflow: hidden; border: 1px solid rgba(117,184,223,.15); border-radius: 999px; background: #071524; }.mix-bar span { min-width: 0; transition: width .35s ease; }.mix-keyboard { background: #52e5f6; }.mix-click { background: #ffd36a; }.mix-cursor { background: #8ba8ff; }.mix-scroll { background: #5bea9c; }.mix-labels { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px 13px; margin: 14px 0 0; }.mix-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: .74rem; }.mix-label i { width: 8px; height: 8px; display: inline-block; margin-right: 6px; border-radius: 99px; background: var(--mix); }.mix-label strong { color: var(--text); font-size: .74rem; }
     .session { margin-top: 28px; padding: 19px; border: 1px solid rgba(82,229,246,.2); border-radius: 14px; background: linear-gradient(135deg, rgba(19,62,85,.55), rgba(9,24,42,.8)); }.session h3 { margin: 0 0 14px; color: var(--cyan); font-size: .76rem; letter-spacing: .14em; }.session dl { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin: 0; color: var(--muted); font-size: .86rem; }.session dd { margin: 0; color: var(--text); font-weight: 750; }.session .total-row { margin-top: 8px; padding-top: 13px; border-top: 1px solid var(--line); color: var(--gold); font-weight: 900; }
-    .settings { padding: 20px 0 0; }.settings h2 { font-size: 1rem; }.settings p { color: var(--muted); line-height: 1.55; font-size: .84rem; }
+    .settings { padding: 20px 0 0; }.settings h2 { font-size: 1rem; }.settings p { color: var(--muted); line-height: 1.55; font-size: .84rem; }.goal-setting { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 10px; margin: 18px 0 11px; }.goal-setting label { display: grid; gap: 6px; color: #c3d9e9; font-size: .75rem; font-weight: 800; }.goal-setting input { width: 100%; padding: 9px; color: var(--text); border: 1px solid var(--line); border-radius: 9px; background: #071524; }.setting-status { min-height: 18px; margin: 0 0 12px; color: var(--muted); font-size: .74rem; }
     dialog { width: min(440px, calc(100% - 30px)); border: 1px solid var(--line); border-radius: 18px; color: var(--text); background: #0a1a2c; box-shadow: var(--shadow); } dialog::backdrop { background: rgba(1,5,12,.68); }
     .online { padding: 4px; }.online h2 { margin: 0 0 5px; font-size: 1.1rem; }.online .hint { margin: 0 0 17px; color: var(--muted); font-size: .8rem; line-height: 1.45; }.online-status { margin: 13px 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); font-size: .82rem; }.online label { display: grid; gap: 6px; margin: 11px 0; color: #c3d9e9; font-size: .75rem; font-weight: 750; }.online input { width: 100%; padding: 10px; color: var(--text); border: 1px solid var(--line); border-radius: 9px; background: #071524; }.online .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }.leaderboard-title { margin: 21px 0 5px; color: var(--gold); font-size: .72rem; font-weight: 850; letter-spacing: .14em; }.online .leaderboard { margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: .82rem; }.online .leaderboard li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 2px; border-bottom: 1px solid rgba(117,184,223,.1); }.online .leaderboard li:first-child span { color: var(--gold); font-weight: 850; }.online .leaderboard strong { color: var(--text); }.online .signed-out, .online .signed-in { display: none; }.online.signed-in .signed-in, .online.signed-out .signed-out { display: block; }
 
-    @media (max-width: 760px) { .app { width: min(100% - 20px, 620px); padding-top: 10px; }.shell { border-radius: 18px; }.topbar { padding: 15px; }.brand p { display: none; }.main { min-height: 540px; padding: 43px 24px 170px; }.hero { grid-template-columns: 1fr; text-align: center; justify-items: center; gap: 25px; }.progress-line { text-align: left; }.identity-row { justify-content: center; }.activity-toggle { top: auto; right: 24px; bottom: 29px; left: 24px; width: auto; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0 10px; transform: none; }.activity-toggle:hover { transform: translateY(-2px); }.activity-toggle b { grid-row: span 2; margin: 0; }.activity-toggle .open-label { margin-top: 0; grid-column: 2; }.rewards { padding: 23px 24px; }.reward { grid-template-columns: 1fr auto; }.reward .bar { grid-column: span 2; grid-row: 2; }.footer { padding: 16px; }.footer p:first-child { display: none; }.drawer { width: 100%; border-left: 0; } }
+    @media (max-width: 760px) { .app { width: min(100% - 20px, 620px); padding-top: 10px; }.shell { border-radius: 18px; }.topbar { padding: 15px; }.brand p { display: none; }.main { min-height: 540px; padding: 43px 24px 170px; }.hero { grid-template-columns: 1fr; text-align: center; justify-items: center; gap: 25px; }.progress-line { text-align: left; }.identity-row { justify-content: center; }.activity-toggle { top: auto; right: 24px; bottom: 29px; left: 24px; width: auto; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0 10px; transform: none; }.activity-toggle:hover { transform: translateY(-2px); }.activity-toggle b { grid-row: span 2; margin: 0; }.activity-toggle .open-label { margin-top: 0; grid-column: 2; }.rewards, .momentum { padding: 23px 24px; }.reward { grid-template-columns: 1fr auto; }.reward .bar { grid-column: span 2; grid-row: 2; }.mission-card { grid-template-columns: 1fr; }.footer { padding: 16px; }.footer p:first-child { display: none; }.drawer { width: 100%; border-left: 0; } }
   </style>
 </head>
 <body>
@@ -136,6 +137,14 @@
         <div class="reward"><label for="scrollBar">Scroll steps</label><div class="bar" id="scrollBar"><span id="scrollBarFill" style="width:0%"></span></div><output id="scrollProgress">0 / 10 steps</output></div>
       </section>
 
+      <section class="momentum" aria-labelledby="momentumTitle">
+        <div class="momentum-head"><h2 class="section-title" id="momentumTitle">DAILY MOMENTUM</h2><p id="streakLabel">1-day streak</p></div>
+        <div class="mission-card">
+          <article class="goal-card"><p class="goal-kicker">TODAY'S MISSION</p><p class="goal-number"><strong id="goalProgress">0</strong> / <span id="goalTarget">500</span> XP</p><div class="bar"><span id="goalBarFill" style="width:0%"></span></div><p class="goal-copy" id="goalCopy">500 XP to reach today's target.</p><div class="achievement-list" id="achievementList" aria-label="Earned badges"></div></article>
+          <article class="history-card"><h3>SEVEN-DAY SIGNAL</h3><p>Local aggregate XP only</p><div class="history-bars" id="historyBars" aria-label="Last seven days of XP"><div class="history-day"><i class="history-fill" id="historyFill0" style="height:4%"></i><span id="historyLabel0">--</span></div><div class="history-day"><i class="history-fill" id="historyFill1" style="height:4%"></i><span id="historyLabel1">--</span></div><div class="history-day"><i class="history-fill" id="historyFill2" style="height:4%"></i><span id="historyLabel2">--</span></div><div class="history-day"><i class="history-fill" id="historyFill3" style="height:4%"></i><span id="historyLabel3">--</span></div><div class="history-day"><i class="history-fill" id="historyFill4" style="height:4%"></i><span id="historyLabel4">--</span></div><div class="history-day"><i class="history-fill" id="historyFill5" style="height:4%"></i><span id="historyLabel5">--</span></div><div class="history-day today"><i class="history-fill" id="historyFill6" style="height:4%"></i><span id="historyLabel6">Today</span></div></div></article>
+        </div>
+      </section>
+
       <footer class="footer"><p>Lifetime: <strong id="footerLifetime">603 XP</strong> &nbsp;·&nbsp; Last saved: <span id="lastSaved">Just now</span></p><p>Only anonymous aggregate XP totals are stored locally.</p><div class="controls"><button class="button pause" id="pauseButton">Pause</button><button class="button danger" id="exitButton">Exit</button></div></footer>
     </main>
   </div>
@@ -153,7 +162,7 @@
     <section class="session"><h3>CURRENT SESSION</h3><dl><dt>Keyboard</dt><dd id="sessionKeyboard">16 XP</dd><dt>Clicks</dt><dd id="sessionClick">1 XP</dd><dt>Cursor</dt><dd id="sessionCursor">2 XP</dd><dt>Scroll</dt><dd id="sessionScroll">0 XP</dd><dt class="total-row">Total</dt><dd class="total-row" id="sessionTotal">19 XP</dd></dl></section>
   </aside>
 
-  <dialog id="settingsDialog"><section class="settings"><h2>Local-only dashboard</h2><p>Updates come from this Computer Warrior process at localhost. Only aggregate XP totals and progress remainders are sent to the dashboard; no typed text, key names, coordinates, or event history are exposed.</p><button class="button" id="closeSettings">Close</button></section></dialog>
+  <dialog id="settingsDialog"><section class="settings"><h2>Local-only dashboard</h2><p>Updates come from this Computer Warrior process at localhost. Only aggregate XP totals, daily goal and progress remainders are stored. No typed text, key names, coordinates or event history are exposed.</p><div class="goal-setting"><label>Daily XP goal<input id="dailyGoalInput" type="number" min="50" max="50000" step="50" value="500"></label><button class="button pause" id="saveGoal">Save goal</button></div><p class="setting-status" id="goalStatus"></p><button class="button" id="closeSettings">Close</button></section></dialog>
   <dialog id="onlineDialog"><section class="online signed-out" id="onlinePanel"><h2>Online profile</h2><p class="hint">The Python app owns your sign-in session. The browser never receives the session token; only anonymous aggregate XP is synced.</p><div class="online-status" id="onlineStatus">Checking local account status…</div><div class="signed-out"><label>Username<input id="onlineUsername" maxlength="24" autocomplete="username"></label><label>Password<input id="onlinePassword" type="password" minlength="10" autocomplete="current-password"></label><label>Beta invite code <span class="hint">(required only when creating a beta account)</span><input id="onlineInviteCode" type="password" maxlength="128" autocomplete="off"></label><label>Worker URL<input id="workerUrl" value="http://127.0.0.1:8787"></label><label>Device label<input id="deviceLabel" value="Computer Warrior device"></label><div class="row"><button class="button" id="registerButton">Create account</button><button class="button" id="loginButton">Sign in</button><button class="button" id="closeOnline">Close</button></div></div><div class="signed-in"><p class="hint" id="accountDetails"></p><div class="row"><button class="button pause" id="syncButton">Sync now</button><button class="button danger" id="logoutButton">Sign out</button><button class="button" id="closeOnlineSigned">Close</button></div><h3 class="leaderboard-title">PRIVATE BETA LEADERBOARD</h3><ol class="leaderboard" id="leaderboardList"></ol></div></section></dialog>
 
   <script>
@@ -202,6 +211,29 @@
       });
       setText('mixSummary', total ? `${leader[1]} leads today's progress.` : 'Earn XP to reveal today\'s activity mix.');
     }
+    function renderMomentum(momentum) {
+      const goal = Number(momentum.goal_xp || 500);
+      const progress = Number(momentum.progress_xp || 0);
+      setText('goalProgress', fmt(progress));
+      setText('goalTarget', fmt(goal));
+      document.getElementById('goalBarFill').style.width = `${Math.min(100, (progress / goal) * 100)}%`;
+      setText('streakLabel', `${fmt(momentum.streak_days || 0)}-day streak`);
+      setText('goalCopy', momentum.complete ? 'Mission complete. Keep building momentum.' : `${fmt(momentum.remaining_xp || 0)} XP to reach today\'s target.`);
+      const goalInput = document.getElementById('dailyGoalInput');
+      if (document.activeElement !== goalInput) goalInput.value = goal;
+      const badges = document.getElementById('achievementList');
+      badges.replaceChildren();
+      (momentum.achievements || ['STARTING OUT']).forEach(label => { const badge = document.createElement('span'); badge.className = 'achievement'; badge.textContent = label; badges.append(badge); });
+      const history = momentum.history || [];
+      const maximum = Math.max(goal, ...history.map(entry => Number(entry.total_xp || 0)), 1);
+      history.forEach((entry, index) => {
+        const fill = document.getElementById(`historyFill${index}`);
+        const label = document.getElementById(`historyLabel${index}`);
+        if (!fill || !label) return;
+        fill.style.height = `${Math.max(4, Math.round((Number(entry.total_xp || 0) / maximum) * 100))}%`;
+        label.textContent = index === history.length - 1 ? 'Today' : String(entry.day_local || '').slice(5);
+      });
+    }
     function render(data) {
       const {session, daily, lifetime, progress, level} = data;
       setStatus(data.paused);
@@ -226,6 +258,7 @@
       updateMetric('cursor', daily.cursor, session.cursor);
       updateMetric('scroll', daily.scroll, session.scroll);
       renderActivityMix(daily);
+      renderMomentum(data.momentum || {});
       setText('sessionTotal', `${fmt(session.total)} XP`);
       setText('lastSaved', data.last_saved_at ? new Date(data.last_saved_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : 'Not saved yet');
     }
@@ -249,6 +282,7 @@
     const settings = document.getElementById('settingsDialog');
     document.getElementById('settingsButton').addEventListener('click', () => settings.showModal());
     document.getElementById('closeSettings').addEventListener('click', () => settings.close());
+    document.getElementById('saveGoal').addEventListener('click', async () => { const goalStatus = document.getElementById('goalStatus'); try { const response = await fetch('/api/goal', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({daily_goal_xp: document.getElementById('dailyGoalInput').value})}); const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Goal update failed'); render(data); goalStatus.textContent = 'Daily goal saved.'; } catch (error) { goalStatus.textContent = error.message; } });
     const onlineDialog = document.getElementById('onlineDialog');
     const onlinePanel = document.getElementById('onlinePanel');
     const onlineStatus = document.getElementById('onlineStatus');

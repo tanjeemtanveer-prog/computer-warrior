@@ -1,6 +1,17 @@
-# Computer Warrior v0.0.8 — Game Loop Dashboard
+# Computer Warrior v0.0.9 — Daily Momentum
 
 A Windows-first activity game core that converts anonymous aggregate input activity into XP. It keeps the CLI dashboard and now also serves a live browser dashboard on this PC only.
+
+## v0.0.9 daily momentum
+
+- Adds a configurable local daily XP goal (50–50,000 XP).
+- Adds goal progress, completion feedback and a consecutive completed-day
+  streak.
+- Retains a rolling seven-day local history of date plus total XP only.
+- Derives small milestone badges from XP, the goal and the streak.
+- Keeps goal settings and history on this PC; neither is sent to the Worker.
+
+This release needs no D1 migration, secret rotation or Worker deployment.
 
 ## v0.0.8 game-loop dashboard
 

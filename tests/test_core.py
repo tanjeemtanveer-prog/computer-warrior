@@ -9,6 +9,7 @@ from unittest.mock import patch
 import uuid
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from computer_warrior.app import _raise_if_listener_stopped, _version_tuple
@@ -68,11 +69,20 @@ def dashboard_snapshot(*, paused: bool = False) -> dict[str, object]:
 
 class DashboardTests(unittest.TestCase):
     def test_web_payload_exposes_only_aggregate_dashboard_values(self) -> None:
-        payload = make_dashboard_payload(dashboard_snapshot(), "2026-07-23T12:00:00+00:00")
+        snapshot = dashboard_snapshot()
+        snapshot["daily_goal_xp"] = 250
+        snapshot["daily_history"] = [
+            {"day_local": "2026-07-21", "total_xp": 260},
+            {"day_local": "2026-07-22", "total_xp": 300},
+        ]
+        payload = make_dashboard_payload(snapshot, "2026-07-23T12:00:00+00:00")
         self.assertEqual(payload["lifetime"]["total"], 1881)
         self.assertEqual(payload["level"]["number"], 2)
         self.assertEqual(payload["level"]["progress_xp"], 881)
         self.assertEqual(payload["progress"]["cursor_pixels"], 485.2522)
+        self.assertTrue(payload["momentum"]["complete"])
+        self.assertEqual(payload["momentum"]["streak_days"], 3)
+        self.assertEqual(len(payload["momentum"]["history"]), 7)
         serialized = json.dumps(payload).lower()
         self.assertNotIn("key_sequence", serialized)
         self.assertNotIn("cursor_position", serialized)
@@ -194,6 +204,24 @@ class TrackerTests(unittest.TestCase):
         self.assertEqual(rolled["session"]["total"], 1)
         self.assertEqual(rolled["lifetime"]["total"], 1)
 
+    def test_daily_goal_and_aggregate_history_survive_rollover_and_save(self) -> None:
+        self.assertEqual(self.tracker.set_daily_goal(750), 750)
+        self.tracker.on_key_press(FakeKey(vk=65))
+        self.day.value = date(2026, 7, 24)
+        rolled = self.tracker.snapshot()
+        self.assertEqual(rolled["daily_goal_xp"], 750)
+        self.assertEqual(rolled["daily_history"], [{"day_local": "2026-07-23", "total_xp": 1}])
+        self.tracker.save()
+        loaded = AtomicJsonStore(self.path).load("2026-07-24").state
+        self.assertEqual(loaded.daily_goal_xp, 750)
+        self.assertEqual(loaded.daily_history[0].total_xp, 1)
+
+    def test_daily_goal_rejects_values_outside_safe_range(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Daily goal"):
+            self.tracker.set_daily_goal(49)
+        with self.assertRaisesRegex(ValueError, "Daily goal"):
+            self.tracker.set_daily_goal(50_001)
+
     def test_injected_events_are_ignored(self) -> None:
         key = FakeKey(vk=65)
         self.tracker.on_key_press(key, injected=True)
@@ -295,6 +323,15 @@ class OnlineSyncTests(unittest.TestCase):
         self.assertNotIn("key_sequence", page.lower())
         self.assertNotIn("cursor_position", page.lower())
 
+    def test_dashboard_contains_local_daily_goal_and_history_controls(self) -> None:
+        page_path = Path(__file__).resolve().parent.parent / "web" / "index.html"
+        page = page_path.read_text(encoding="utf-8")
+        server = (Path(__file__).resolve().parent.parent / "computer_warrior" / "web.py").read_text(encoding="utf-8")
+        self.assertIn('id="dailyGoalInput"', page)
+        self.assertIn('id="historyBars"', page)
+        self.assertIn("function renderMomentum(momentum)", page)
+        self.assertIn('self.path == "/api/goal"', server)
+
     def test_online_refresh_route_returns_json_instead_of_an_html_404(self) -> None:
         with tempfile.TemporaryDirectory() as folder:
             tracker = ActivityTracker(AtomicJsonStore(Path(folder) / "stats.json"))
@@ -313,6 +350,37 @@ class OnlineSyncTests(unittest.TestCase):
                     self.assertEqual(response.status, 200)
                     payload = json.loads(response.read().decode("utf-8"))
                 self.assertFalse(payload["signed_in"])
+            finally:
+                server.stop()
+
+    def test_daily_goal_route_persists_only_a_local_aggregate_setting(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            tracker = ActivityTracker(AtomicJsonStore(Path(folder) / "stats.json"))
+            manager = OnlineSyncManager(Path(folder) / "online_sync.json")
+            page_path = Path(__file__).resolve().parent.parent / "web" / "index.html"
+            server = LocalDashboardServer(tracker, page_path, 0, manager)
+            server.start()
+            try:
+                request = Request(
+                    server.url + "api/goal",
+                    data=b'{"daily_goal_xp":750}',
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with urlopen(request, timeout=2) as response:
+                    self.assertEqual(response.status, 200)
+                    payload = json.loads(response.read().decode("utf-8"))
+                self.assertEqual(payload["momentum"]["goal_xp"], 750)
+
+                invalid = Request(
+                    server.url + "api/goal",
+                    data=b'{"daily_goal_xp":49}',
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with self.assertRaises(HTTPError) as captured:
+                    urlopen(invalid, timeout=2)
+                self.assertEqual(captured.exception.code, 400)
             finally:
                 server.stop()
 

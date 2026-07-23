@@ -9,8 +9,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from .config import APP_NAME, APP_VERSION, SCHEMA_VERSION
-from .model import MetricTotals, PersistedState
+from .config import APP_NAME, APP_VERSION, DAILY_HISTORY_DAYS, DEFAULT_DAILY_GOAL_XP, SCHEMA_VERSION
+from .model import DailyHistoryEntry, MetricTotals, PersistedState
 
 
 class PersistenceError(RuntimeError):
@@ -49,6 +49,12 @@ class AtomicJsonStore:
         if int(payload.get("schema_version", -1)) != SCHEMA_VERSION:
             raise ValueError("Unsupported stats schema version")
 
+        history_raw = payload.get("daily_history", [])
+        if not isinstance(history_raw, list):
+            raise ValueError("daily_history must be a list")
+        history = [DailyHistoryEntry.from_mapping(value) for value in history_raw]
+        history.sort(key=lambda entry: entry.day_local)
+
         state = PersistedState(
             day_local=str(payload["day_local"]),
             lifetime=MetricTotals.from_mapping(payload.get("lifetime")),
@@ -59,6 +65,8 @@ class AtomicJsonStore:
             scroll_remainder_steps=max(
                 0.0, float(payload.get("scroll_remainder_steps", 0.0))
             ),
+            daily_goal_xp=int(payload.get("daily_goal_xp", DEFAULT_DAILY_GOAL_XP)),
+            daily_history=history[-DAILY_HISTORY_DAYS:],
         )
         state.validate()
         return state
@@ -132,6 +140,8 @@ class AtomicJsonStore:
                 state.movement_remainder_pixels, 6
             ),
             "scroll_remainder_steps": round(state.scroll_remainder_steps, 6),
+            "daily_goal_xp": state.daily_goal_xp,
+            "daily_history": [entry.to_dict() for entry in state.daily_history],
         }
 
     @staticmethod

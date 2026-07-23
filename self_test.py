@@ -69,6 +69,7 @@ def main() -> int:
 - Cloudflare-compatible User-Agent on Python Worker requests.
 - Workers Free CPU-compatible beta password work factor.
 - Local dashboard rank, session-pulse and aggregate activity-mix UI contract.
+- Local daily-goal validation, streak calculation and seven-day aggregate history.
 - Direct loading of v0.0.1-hotfix.1 schema-version-1 stats without XP loss.
 
 ## Test runner output

@@ -15,8 +15,11 @@ from .config import (
     PIXELS_PER_CURSOR_XP,
     QUIT_KEY_NAME,
     SCROLL_STEPS_PER_XP,
+    DAILY_HISTORY_DAYS,
+    MAX_DAILY_GOAL_XP,
+    MIN_DAILY_GOAL_XP,
 )
-from .model import MetricTotals, PersistedState
+from .model import DailyHistoryEntry, MetricTotals, PersistedState
 from .persistence import AtomicJsonStore, LoadResult, PersistenceError
 
 
@@ -66,8 +69,26 @@ class ActivityTracker:
     def _roll_day_if_needed_locked(self) -> None:
         today = self._today_string()
         if self.state.day_local != today:
+            self._record_daily_history_locked(self.state.day_local, self.state.daily.total)
             self.state.day_local = today
             self.state.daily = MetricTotals()
+
+    def _record_daily_history_locked(self, day_local: str, total_xp: int) -> None:
+        """Keep a short local-only history of daily aggregate totals."""
+        entries = [entry for entry in self.state.daily_history if entry.day_local != day_local]
+        entries.append(DailyHistoryEntry(day_local=day_local, total_xp=max(0, int(total_xp))))
+        entries.sort(key=lambda entry: entry.day_local)
+        self.state.daily_history = entries[-DAILY_HISTORY_DAYS:]
+
+    def set_daily_goal(self, goal_xp: int) -> int:
+        with self.lock:
+            goal = int(goal_xp)
+            if not MIN_DAILY_GOAL_XP <= goal <= MAX_DAILY_GOAL_XP:
+                raise ValueError(
+                    f"Daily goal must be between {MIN_DAILY_GOAL_XP} and {MAX_DAILY_GOAL_XP} XP"
+                )
+            self.state.daily_goal_xp = goal
+            return goal
 
     @staticmethod
     def key_identifier(key: Any) -> tuple[str, object]:
@@ -231,6 +252,8 @@ class ActivityTracker:
                 "scroll_remainder_steps": round(
                     self.state.scroll_remainder_steps, 4
                 ),
+                "daily_goal_xp": self.state.daily_goal_xp,
+                "daily_history": [entry.to_dict() for entry in self.state.daily_history],
             }
 
     def save(self) -> None:
@@ -242,5 +265,7 @@ class ActivityTracker:
                 daily=MetricTotals.from_mapping(self.state.daily.to_dict()),
                 movement_remainder_pixels=self.state.movement_remainder_pixels,
                 scroll_remainder_steps=self.state.scroll_remainder_steps,
+                daily_goal_xp=self.state.daily_goal_xp,
+                daily_history=list(self.state.daily_history),
             )
         self.store.save(state_copy)

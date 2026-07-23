@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import threading
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -26,12 +26,39 @@ def make_dashboard_payload(snapshot: dict[str, object], saved_at: str | None) ->
     level = total // 1000 + 1
     level_start = (level - 1) * 1000
     level_progress = total - level_start
+    day_local = str(snapshot["day_local"])
+    daily = dict(snapshot["daily"])
+    daily_total = int(daily.get("total", 0))
+    goal_xp = int(snapshot.get("daily_goal_xp", 500))
+    history = [entry for entry in snapshot.get("daily_history", []) if isinstance(entry, dict)]
+    history_by_day = {str(entry.get("day_local")): max(0, int(entry.get("total_xp", 0))) for entry in history}
+    history_by_day[day_local] = daily_total
+    today = date.fromisoformat(day_local)
+    week = []
+    for offset in range(6, -1, -1):
+        item_day = today - timedelta(days=offset)
+        iso_day = item_day.isoformat()
+        week.append({"day_local": iso_day, "total_xp": history_by_day.get(iso_day, 0)})
+    streak = 0
+    streak_day = today if daily_total >= goal_xp else today - timedelta(days=1)
+    while history_by_day.get(streak_day.isoformat(), 0) >= goal_xp:
+        streak += 1
+        streak_day -= timedelta(days=1)
+    achievements = []
+    if total >= 100:
+        achievements.append("FIRST SPARK")
+    if daily_total >= goal_xp:
+        achievements.append("GOAL CLEARED")
+    if streak >= 3:
+        achievements.append("MOMENTUM")
+    if total >= 10_000:
+        achievements.append("FIVE FIGURES")
 
     return {
         "paused": bool(snapshot["paused"]),
-        "day_local": str(snapshot["day_local"]),
+        "day_local": day_local,
         "session": dict(snapshot["session"]),
-        "daily": dict(snapshot["daily"]),
+        "daily": daily,
         "lifetime": lifetime,
         "progress": {
             "cursor_pixels": float(snapshot["movement_remainder_pixels"]),
@@ -44,6 +71,15 @@ def make_dashboard_payload(snapshot: dict[str, object], saved_at: str | None) ->
             "progress_xp": level_progress,
             "target_xp": 1000,
             "remaining_xp": 1000 - level_progress,
+        },
+        "momentum": {
+            "goal_xp": goal_xp,
+            "progress_xp": daily_total,
+            "remaining_xp": max(0, goal_xp - daily_total),
+            "complete": daily_total >= goal_xp,
+            "streak_days": streak,
+            "history": week,
+            "achievements": achievements,
         },
         "last_saved_at": saved_at,
     }
@@ -183,6 +219,15 @@ class LocalDashboardServer:
                     owner._tracker.set_paused(False)
                 elif self.path == "/api/control/exit":
                     owner._tracker.request_shutdown()
+                elif self.path == "/api/goal":
+                    try:
+                        payload = self._body()
+                        owner._tracker.set_daily_goal(int(payload.get("daily_goal_xp", 0)))
+                        owner._tracker.save()
+                        owner.mark_saved()
+                    except ValueError as exc:
+                        self._json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+                        return
                 elif self.path == "/api/online/register":
                     self._online_action("register")
                     return
