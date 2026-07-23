@@ -1,6 +1,14 @@
-# Computer Warrior v0.0.9 — Daily Momentum
+# Computer Warrior v0.0.9.1 — Daily Momentum chart fix
 
 A Windows-first activity game core that converts anonymous aggregate input activity into XP. It keeps the CLI dashboard and now also serves a live browser dashboard on this PC only.
+
+## v0.0.9.1 daily momentum chart fix
+
+- Makes dates without a saved local daily record visibly empty in the
+  seven-day signal, rather than rendering them as activity bars.
+- Labels empty dates with an accessible “No data” marker; stored aggregate
+  XP values remain the only chart data.
+- Needs no Worker deployment, D1 migration, or change to existing XP.
 
 ## v0.0.9 daily momentum
 

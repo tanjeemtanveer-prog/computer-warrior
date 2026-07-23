@@ -83,6 +83,8 @@ class DashboardTests(unittest.TestCase):
         self.assertTrue(payload["momentum"]["complete"])
         self.assertEqual(payload["momentum"]["streak_days"], 3)
         self.assertEqual(len(payload["momentum"]["history"]), 7)
+        self.assertFalse(payload["momentum"]["history"][0]["has_data"])
+        self.assertTrue(payload["momentum"]["history"][-1]["has_data"])
         serialized = json.dumps(payload).lower()
         self.assertNotIn("key_sequence", serialized)
         self.assertNotIn("cursor_position", serialized)
@@ -330,6 +332,8 @@ class OnlineSyncTests(unittest.TestCase):
         self.assertIn('id="dailyGoalInput"', page)
         self.assertIn('id="historyBars"', page)
         self.assertIn("function renderMomentum(momentum)", page)
+        self.assertIn("fill.classList.toggle('empty', !hasData)", page)
+        self.assertIn("'No data'", page)
         self.assertIn('self.path == "/api/goal"', server)
 
     def test_online_refresh_route_returns_json_instead_of_an_html_404(self) -> None:

@@ -38,7 +38,16 @@ def make_dashboard_payload(snapshot: dict[str, object], saved_at: str | None) ->
     for offset in range(6, -1, -1):
         item_day = today - timedelta(days=offset)
         iso_day = item_day.isoformat()
-        week.append({"day_local": iso_day, "total_xp": history_by_day.get(iso_day, 0)})
+        week.append(
+            {
+                "day_local": iso_day,
+                "total_xp": history_by_day.get(iso_day, 0),
+                # Distinguish an absent local history record from a day that
+                # has a recorded aggregate total. The browser uses this only
+                # to avoid drawing invented activity bars.
+                "has_data": iso_day in history_by_day,
+            }
+        )
     streak = 0
     streak_day = today if daily_total >= goal_xp else today - timedelta(days=1)
     while history_by_day.get(streak_day.isoformat(), 0) >= goal_xp:
