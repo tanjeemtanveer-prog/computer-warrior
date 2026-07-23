@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { __test, route } from "../src/index.js";
 
 class AuthTestD1 {
@@ -43,6 +44,18 @@ function betaEnvironment(database) {
     INVITE_CODE: "i".repeat(32),
     DB: database,
   };
+}
+
+class AnalyticsTestBinding {
+  constructor({ fail = false } = {}) {
+    this.fail = fail;
+    this.points = [];
+  }
+
+  writeDataPoint(point) {
+    if (this.fail) throw new Error("analytics unavailable");
+    this.points.push(point);
+  }
 }
 
 test("public API health endpoint is CORS-safe for the local dashboard", async () => {
@@ -148,4 +161,82 @@ test("private beta blocks repeated account attempts from one address", async () 
   }
   assert.equal(response.status, 429);
   assert.equal((await response.json()).error.code, "auth_rate_limited");
+});
+
+test("product analytics uses an anonymous allowlisted schema", () => {
+  const point = __test.productAnalyticsPoint({ APP_ENV: "beta" }, "xp_sync_accepted", 19);
+  assert.deepEqual(point, {
+    indexes: ["xp_sync_accepted"],
+    blobs: ["xp_sync_accepted", "beta", "product-v1"],
+    doubles: [1, 19],
+  });
+  assert.equal(__test.productAnalyticsPoint({ APP_ENV: "beta" }, "username:tanveer", 1), null);
+  const serialized = JSON.stringify(point);
+  for (const forbidden of ["username", "email", "account_id", "device_id", "session", "token", "ip", "user-agent"]) {
+    assert.equal(serialized.includes(forbidden), false);
+  }
+});
+
+test("analytics is optional and never breaks a product action", () => {
+  assert.equal(__test.recordProductEvent({}, "account_registered"), false);
+  const working = new AnalyticsTestBinding();
+  assert.equal(__test.recordProductEvent({ APP_ENV: "beta", ANALYTICS: working }, "account_registered"), true);
+  assert.equal(working.points.length, 1);
+  const failing = new AnalyticsTestBinding({ fail: true });
+  const originalWarn = console.warn;
+  let failureResult;
+  try {
+    console.warn = () => {};
+    assert.doesNotThrow(() => {
+      failureResult = __test.recordProductEvent({ APP_ENV: "beta", ANALYTICS: failing }, "login_succeeded");
+    });
+  } finally {
+    console.warn = originalWarn;
+  }
+  assert.equal(failureResult, false);
+});
+
+test("successful beta registration emits one anonymous product event", async () => {
+  const database = new AuthTestD1();
+  const analytics = new AnalyticsTestBinding();
+  const env = { ...betaEnvironment(database), ANALYTICS: analytics };
+  const response = await route(new Request("https://computer-warrior-beta.example/api/auth/register", {
+    method: "POST",
+    headers: { "content-type": "application/json", "CF-Connecting-IP": "203.0.113.20" },
+    body: JSON.stringify({
+      username: "analytics_user",
+      password: "correct horse battery staple",
+      invite_code: "i".repeat(32),
+    }),
+  }), env);
+  assert.equal(response.status, 201);
+  assert.equal(analytics.points.length, 1);
+  assert.deepEqual(analytics.points[0].blobs, ["account_registered", "beta", "product-v1"]);
+});
+
+test("public site is separate, responsive, privacy-explicit, and not a fake signup form", () => {
+  const landing = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
+  const privacy = readFileSync(new URL("../public/privacy/index.html", import.meta.url), "utf8");
+  const styles = readFileSync(new URL("../public/styles.css", import.meta.url), "utf8");
+  assert.match(landing, /Turn everyday computer activity/);
+  assert.match(landing, /No typed content/);
+  assert.match(landing, /Public accounts come next/);
+  assert.doesNotMatch(landing, /<form\b/i);
+  assert.doesNotMatch(landing, /id="onlineDialog"/);
+  assert.match(privacy, /What is never recorded/);
+  assert.match(privacy, /CLOUDFLARE_WEB_ANALYTICS/);
+  assert.match(styles, /@media \(max-width: 760px\)/);
+  assert.match(styles, /prefers-reduced-motion/);
+});
+
+test("Wrangler serves static pages while API routes and analytics remain Worker-owned", () => {
+  const local = JSON.parse(readFileSync(new URL("../wrangler.jsonc", import.meta.url), "utf8"));
+  const beta = JSON.parse(readFileSync(new URL("../wrangler.beta.jsonc", import.meta.url), "utf8"));
+  assert.equal(local.assets.directory, "./public");
+  assert.deepEqual(local.assets.run_worker_first, ["/api/*"]);
+  assert.equal(beta.assets.not_found_handling, "404-page");
+  assert.deepEqual(beta.analytics_engine_datasets, [{
+    binding: "ANALYTICS",
+    dataset: "computer_warrior_product",
+  }]);
 });

@@ -1,7 +1,20 @@
-# Computer Warrior — Cloudflare D1 backend
+# Computer Warrior — Cloudflare public site and D1 backend
 
 This folder is the v0.0.4 online-account foundation. It runs entirely on this
 computer until you deliberately create and deploy a real D1 database.
+
+## v0.2.0 public assets and analytics
+
+`public/` is the public marketing site. Wrangler serves those files as static
+assets and runs Worker code first only for `/api/*`. The local dashboard in
+the repository-level `web/` folder is still served only by the Python process
+at `127.0.0.1`; it is not a public Cloudflare asset.
+
+The beta configuration includes the optional Workers Analytics Engine binding
+`ANALYTICS`. Product event writes are anonymous, allowlisted, and non-blocking.
+Visitor measurement is a separate Cloudflare Web Analytics setup and is not
+enabled until its dashboard-generated site snippet is added. Read
+`ANALYTICS.md` before enabling or extending either source.
 
 ## What is included
 

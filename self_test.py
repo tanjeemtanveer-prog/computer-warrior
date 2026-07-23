@@ -72,6 +72,9 @@ def main() -> int:
 - Local daily-goal validation, streak calculation and seven-day aggregate history.
 - Local focus-quest start, pause, completion, aggregate-XP record and restart behavior.
 - Focus-quest dashboard controls and loopback API routes without any Cloudflare upload.
+- Public landing-page separation, privacy copy, responsive layout and honest beta state.
+- Optional anonymous product-event schema and failure-safe Analytics Engine writes.
+- Workers Static Assets routing that keeps `/api/*` on the Worker.
 - Direct loading of v0.0.1-hotfix.1 schema-version-1 stats without XP loss.
 
 ## Test runner output

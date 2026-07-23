@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="Computer Warrior privacy design: what the Windows tracker uses, what optional account sync sends, and what is never recorded.">
+  <title>Privacy — Computer Warrior</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="site-header">
+    <div class="container nav-shell">
+      <a class="brand" href="/" aria-label="Computer Warrior home">
+        <span class="brand-mark" aria-hidden="true">CW</span>
+        <span class="brand-copy"><strong>COMPUTER WARRIOR</strong><small>Your effort becomes progress.</small></span>
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="privacy-nav">
+        <span class="sr-only">Open navigation</span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </button>
+      <nav id="privacy-nav" class="site-nav" aria-label="Privacy page navigation">
+        <a href="/">Home</a>
+        <a href="/#features">Features</a>
+        <a href="/#how-it-works">How it works</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="legal-page">
+    <article class="container legal-shell">
+      <p class="eyebrow">PRIVACY BY DESIGN</p>
+      <h1>A small, explicit data boundary.</h1>
+      <p class="legal-intro">Computer Warrior is an early private beta. This page explains the product’s current technical privacy boundary in plain language. A production legal privacy policy will be added before public account registration opens.</p>
+
+      <section class="legal-card">
+        <h2>What the Windows tracker calculates</h2>
+        <p>The tracker converts physical input signals into aggregate counters for keyboard, mouse clicks, cursor distance, and scrolling. It also calculates session, daily, and lifetime XP totals. Daily goals, seven-day history, and focus quests remain local to the PC.</p>
+      </section>
+
+      <section class="legal-card">
+        <h2>What is stored locally</h2>
+        <ul>
+          <li>Aggregate XP counters and progress remainders.</li>
+          <li>The current local day and recent aggregate daily totals.</li>
+          <li>The local daily goal and completed focus-quest summaries.</li>
+          <li>A random installation device ID and pending aggregate sync batches when online features are enabled.</li>
+          <li>The account session token in Windows Credential Manager, not in the browser.</li>
+        </ul>
+      </section>
+
+      <section class="legal-card">
+        <h2>What optional account sync sends</h2>
+        <p>When you sign in and sync, the desktop app sends a random device UUID, an ordered sequence number, the batch duration and time, and four aggregate XP values: keyboard, click, cursor, and scroll. The server combines accepted batches into account totals.</p>
+      </section>
+
+      <section class="legal-card">
+        <h2>What is never recorded by the activity tracker</h2>
+        <ul>
+          <li>Typed keys, typed text, or key sequences.</li>
+          <li>Cursor coordinates, click locations, or event-by-event input history.</li>
+          <li>Application names, window titles, websites, or browser history.</li>
+          <li>Screenshots, microphone audio, camera video, files, or clipboard content.</li>
+          <li>Injected or synthetic keyboard and mouse events for XP.</li>
+        </ul>
+      </section>
+
+      <section class="legal-card">
+        <h2>Website and product analytics</h2>
+        <p>The public website is prepared to use Cloudflare Web Analytics for aggregate visitor and performance measurements without cookies or cross-site tracking. The backend can record a small allowlist of anonymous product events, such as a successful account creation or accepted XP sync. Product analytics never includes a username, email address, account ID, device ID, session token, IP address, user-agent string, or raw activity.</p>
+        <p class="legal-note">Visitor analytics is not enabled until a Cloudflare Web Analytics site token is deliberately added during deployment.</p>
+      </section>
+
+      <section class="legal-card">
+        <h2>Leaderboard visibility</h2>
+        <p>Leaderboard participation is off by default. If a signed-in user opts in, the public leaderboard shows only username, rank, and accepted aggregate XP. Device details and private local progress are not published.</p>
+      </section>
+
+      <section class="legal-card">
+        <h2>Beta status</h2>
+        <p>Public email and Google account creation, account recovery, newsletter consent, deletion/export tools, and a final legal policy are planned before a public launch. Until those safeguards exist, registration remains invite-only.</p>
+      </section>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="brand footer-brand"><span class="brand-mark" aria-hidden="true">CW</span><span class="brand-copy"><strong>COMPUTER WARRIOR</strong><small>Your effort becomes progress.</small></span></div>
+      <p>Built for visible progress, not surveillance.</p>
+      <nav aria-label="Footer navigation"><a href="/">Home</a><a href="/#beta">Beta status</a></nav>
+      <p class="copyright">© <span data-current-year>2026</span> Computer Warrior. Private beta.</p>
+    </div>
+  </footer>
+  <!-- CLOUDFLARE_WEB_ANALYTICS: add the Cloudflare-generated beacon snippet here only after a site token exists. -->
+</body>
+</html>

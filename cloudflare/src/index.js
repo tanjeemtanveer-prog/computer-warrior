@@ -9,6 +9,15 @@ const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
 const AUTH_WINDOW_MS = 15 * 60 * 1000;
 const AUTH_MAX_ATTEMPTS = 8;
 const AUTH_BLOCK_MS = 15 * 60 * 1000;
+const PRODUCT_ANALYTICS_SCHEMA = "product-v1";
+const PRODUCT_ANALYTICS_EVENTS = new Set([
+  "account_registered",
+  "login_succeeded",
+  "device_registered",
+  "xp_sync_accepted",
+  "leaderboard_enabled",
+  "leaderboard_disabled",
+]);
 const ALLOWED_LOCAL_ORIGINS = new Set([
   "http://127.0.0.1:8765",
   "http://localhost:8765",
@@ -18,6 +27,36 @@ const ALLOWED_LOCAL_ORIGINS = new Set([
 
 function now() {
   return new Date().toISOString();
+}
+
+function productAnalyticsPoint(env, eventName, value = 0) {
+  if (!PRODUCT_ANALYTICS_EVENTS.has(eventName)) return null;
+  const numericValue = Number(value);
+  const safeValue = Number.isFinite(numericValue)
+    ? Math.max(0, Math.min(1_000_000, numericValue))
+    : 0;
+  const environment = ["local", "beta", "production"].includes(env?.APP_ENV)
+    ? env.APP_ENV
+    : "unknown";
+  return {
+    indexes: [eventName],
+    blobs: [eventName, environment, PRODUCT_ANALYTICS_SCHEMA],
+    doubles: [1, safeValue],
+  };
+}
+
+function recordProductEvent(env, eventName, value = 0) {
+  if (!env?.ANALYTICS || typeof env.ANALYTICS.writeDataPoint !== "function") return false;
+  const point = productAnalyticsPoint(env, eventName, value);
+  if (!point) return false;
+  try {
+    env.ANALYTICS.writeDataPoint(point);
+    return true;
+  } catch (_) {
+    // Product analytics must never block registration, sync, or another user action.
+    console.warn("computer-warrior analytics event dropped", eventName);
+    return false;
+  }
 }
 
 function isPrivateBeta(env) {
@@ -232,7 +271,9 @@ async function register(request, env) {
     if (String(cause).includes("UNIQUE")) return error("Username is already taken", 409, request, env, "username_taken");
     throw cause;
   }
-  return createSession(request, env, accountId, payload.username.trim(), 201);
+  const response = await createSession(request, env, accountId, payload.username.trim(), 201);
+  recordProductEvent(env, "account_registered");
+  return response;
 }
 
 async function createSession(request, env, accountId, username, status = 200) {
@@ -252,7 +293,9 @@ async function login(request, env) {
   const account = await env.DB.prepare("SELECT id, username, password_salt, password_hash FROM accounts WHERE username = ?")
     .bind(payload.username.trim()).first();
   if (!account || await passwordHash(payload.password, account.password_salt, env) !== account.password_hash) return error("Invalid username or password", 401, request, env, "invalid_credentials");
-  return createSession(request, env, account.id, account.username);
+  const response = await createSession(request, env, account.id, account.username);
+  recordProductEvent(env, "login_succeeded");
+  return response;
 }
 
 async function createDevice(request, env, account) {
@@ -268,6 +311,7 @@ async function createDevice(request, env, account) {
   } else {
     await env.DB.prepare("INSERT INTO devices (id, account_id, label, public_key, created_at, last_seen_at) VALUES (?, ?, ?, ?, ?, ?)")
       .bind(payload.device_id, account.id, label, typeof payload.public_key === "string" ? payload.public_key.slice(0, 4096) : null, timestamp, timestamp).run();
+    recordProductEvent(env, "device_registered");
   }
   const device = await env.DB.prepare("SELECT id, label, last_sequence, verified_total, created_at, last_seen_at FROM devices WHERE id = ?").bind(payload.device_id).first();
   return json({ device }, 201, request, env);
@@ -304,6 +348,7 @@ async function sync(request, env, account) {
     env.DB.prepare("INSERT INTO account_daily_totals (account_id, day_utc, verified_total, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(account_id, day_utc) DO UPDATE SET verified_total = verified_total + excluded.verified_total, updated_at = excluded.updated_at")
       .bind(account.id, dayUtc, item.total, receivedAt),
   ]);
+  recordProductEvent(env, "xp_sync_accepted", item.total);
   return json({ accepted: true, idempotent: false, entry: { sequence: item.sequence, total_xp: item.total, status: "verified" }, totals: await accountSummary(env, account.id) }, 201, request, env);
 }
 
@@ -390,6 +435,7 @@ async function setLeaderboardVisibility(request, env, account) {
   const payload = await body(request);
   if (typeof payload.public_visible !== "boolean") return error("public_visible must be true or false", 400, request, env, "invalid_visibility");
   await env.DB.prepare("UPDATE accounts SET leaderboard_visible = ? WHERE id = ?").bind(payload.public_visible ? 1 : 0, account.id).run();
+  recordProductEvent(env, payload.public_visible ? "leaderboard_enabled" : "leaderboard_disabled");
   return json({ account: { username: account.username, leaderboard_visible: payload.public_visible } }, 200, request, env);
 }
 
@@ -430,4 +476,18 @@ export default {
 };
 
 export { route };
-export const __test = { canonicalSync, constantTimeEqual, inviteOnly, isPrivateBeta, leaderboardDay, leaderboardPeriod, passwordIterations, sessionTokenHash, syncPayload, validDeviceId, validUsername };
+export const __test = {
+  canonicalSync,
+  constantTimeEqual,
+  inviteOnly,
+  isPrivateBeta,
+  leaderboardDay,
+  leaderboardPeriod,
+  passwordIterations,
+  productAnalyticsPoint,
+  recordProductEvent,
+  sessionTokenHash,
+  syncPayload,
+  validDeviceId,
+  validUsername,
+};

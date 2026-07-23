@@ -1,6 +1,27 @@
-# Computer Warrior v0.1.1 — Focus Quests
+# Computer Warrior v0.2.0 — Public Site and Analytics Foundation
 
 A Windows-first activity game core that converts anonymous aggregate input activity into XP. It keeps the CLI dashboard and now also serves a live browser dashboard on this PC only.
+
+## v0.2.0 public site and analytics foundation
+
+- Adds a responsive Cloudflare-hosted landing page, privacy page, and branded
+  404 page without exposing or replacing the localhost tracker dashboard.
+- Uses Workers Static Assets for public pages while `/api/*` continues through
+  the existing Worker and D1 backend.
+- Prepares Cloudflare Web Analytics for cookie-free daily visitors, page views,
+  referrers, device aggregates, and performance. A real Cloudflare-generated
+  site token must be added deliberately before visitor analytics starts.
+- Adds optional Workers Analytics Engine events for successful account,
+  device, sync, and leaderboard actions.
+- Analytics has a fixed anonymous schema and never accepts username, email,
+  account ID, device ID, token, IP address, user-agent, or raw activity.
+- Adds `cloudflare/ANALYTICS.md` and tested starter SQL queries for later product
+  reporting.
+- Needs no D1 migration or secret rotation. Deploy the beta Worker to publish
+  the site and analytics binding.
+
+Follow `V0.2.0_UPGRADE_GUIDE.md` for the exact Windows copy, test, preview, Git,
+deployment, and Web Analytics steps.
 
 ## v0.1.1 focus quests
 

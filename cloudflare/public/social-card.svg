@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">Computer Warrior</title>
+  <desc id="description">Your effort becomes progress.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#03070e"/>
+      <stop offset=".55" stop-color="#07111f"/>
+      <stop offset="1" stop-color="#0a1329"/>
+    </linearGradient>
+    <linearGradient id="mark" x1="150" y1="130" x2="400" y2="470" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8af2fc"/>
+      <stop offset="1" stop-color="#23c7dd"/>
+    </linearGradient>
+    <pattern id="grid" width="38" height="38" patternUnits="userSpaceOnUse">
+      <path d="M38 0H0v38" fill="none" stroke="#63b3e0" stroke-opacity=".05"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <circle cx="980" cy="110" r="300" fill="#25a2cd" fill-opacity=".08"/>
+  <path fill="url(#mark)" d="m282 103 147 66-27 201-120 60-120-60-27-201 147-66Z"/>
+  <text x="282" y="294" fill="#06111d" font-family="Arial, sans-serif" font-size="74" font-weight="900" text-anchor="middle">CW</text>
+  <text x="500" y="247" fill="#edf8ff" font-family="Arial, sans-serif" font-size="58" font-weight="800" letter-spacing="4">COMPUTER</text>
+  <text x="500" y="320" fill="#edf8ff" font-family="Arial, sans-serif" font-size="58" font-weight="800" letter-spacing="4">WARRIOR</text>
+  <text x="505" y="382" fill="#52e5f6" font-family="Arial, sans-serif" font-size="29">Your effort becomes progress.</text>
+  <text x="505" y="430" fill="#93a9bc" font-family="Arial, sans-serif" font-size="21">Privacy-first activity game for Windows</text>
+</svg>

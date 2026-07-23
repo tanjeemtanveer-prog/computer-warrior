@@ -1,7 +1,7 @@
-# Computer Warrior v0.1.1 Automated QA Notes
+# Computer Warrior v0.2.0 Automated QA Notes
 
 - Result: **PASS**
-- Generated: 2026-07-23T10:01:40.321830+00:00
+- Generated: 2026-07-23T11:43:00.238799+00:00
 - Python: 3.13.2
 - Platform: Windows-11-10.0.26200-SP0
 - pynput in test environment: 1.8.2
@@ -39,6 +39,9 @@
 - Local daily-goal validation, streak calculation and seven-day aggregate history.
 - Local focus-quest start, pause, completion, aggregate-XP record and restart behavior.
 - Focus-quest dashboard controls and loopback API routes without any Cloudflare upload.
+- Public landing-page separation, privacy copy, responsive layout and honest beta state.
+- Optional anonymous product-event schema and failure-safe Analytics Engine writes.
+- Workers Static Assets routing that keeps `/api/*` on the Worker.
 - Direct loading of v0.0.1-hotfix.1 schema-version-1 stats without XP loss.
 
 ## Test runner output
@@ -87,7 +90,7 @@ test_session_daily_lifetime_and_daily_rollover (test_core.TrackerTests.test_sess
 test_second_instance_is_rejected (test_core.WindowsMutexTests.test_second_instance_is_rejected) ... ok
 
 ----------------------------------------------------------------------
-Ran 41 tests in 2.020s
+Ran 41 tests in 2.271s
 
 OK
 ```

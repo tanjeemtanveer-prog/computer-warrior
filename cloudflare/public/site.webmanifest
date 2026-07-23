@@ -1,0 +1,17 @@
+{
+  "name": "Computer Warrior",
+  "short_name": "Computer Warrior",
+  "description": "A privacy-first activity game for Windows.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#050b14",
+  "theme_color": "#07111f",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
