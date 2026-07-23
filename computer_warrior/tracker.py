@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import math
 import threading
+import time
+from dataclasses import dataclass
 from datetime import date
 from typing import Any, Callable
 
@@ -16,10 +18,13 @@ from .config import (
     QUIT_KEY_NAME,
     SCROLL_STEPS_PER_XP,
     DAILY_HISTORY_DAYS,
+    FOCUS_QUEST_HISTORY_LIMIT,
+    MAX_FOCUS_QUEST_MINUTES,
     MAX_DAILY_GOAL_XP,
+    MIN_FOCUS_QUEST_MINUTES,
     MIN_DAILY_GOAL_XP,
 )
-from .model import DailyHistoryEntry, MetricTotals, PersistedState
+from .model import DailyHistoryEntry, FocusQuestRecord, MetricTotals, PersistedState
 from .persistence import AtomicJsonStore, LoadResult, PersistenceError
 
 
@@ -30,9 +35,11 @@ class ActivityTracker:
         self,
         store: AtomicJsonStore,
         day_provider: Callable[[], date] = date.today,
+        monotonic_provider: Callable[[], float] = time.monotonic,
     ) -> None:
         self.store = store
         self.day_provider = day_provider
+        self.monotonic_provider = monotonic_provider
         self.lock = threading.RLock()
         self.keys_currently_down: set[tuple[str, object]] = set()
         self.last_mouse_position: tuple[float, float] | None = None
@@ -41,6 +48,7 @@ class ActivityTracker:
         self.shutdown_requested = threading.Event()
         self.last_load_warning: str | None = None
         self.recovered_from_backup = False
+        self._focus_quest: _ActiveFocusQuest | None = None
 
         today = self._today_string()
         try:
@@ -79,6 +87,99 @@ class ActivityTracker:
         entries.append(DailyHistoryEntry(day_local=day_local, total_xp=max(0, int(total_xp))))
         entries.sort(key=lambda entry: entry.day_local)
         self.state.daily_history = entries[-DAILY_HISTORY_DAYS:]
+
+    def _focus_summary_locked(self) -> dict[str, object]:
+        self._refresh_focus_quest_locked()
+        records = self.state.focus_quest_history
+        completed_today = sum(
+            1 for record in records if record.completed_day_local == self.state.day_local
+        )
+        if self._focus_quest is None:
+            return {
+                "active": False,
+                "paused": False,
+                "duration_minutes": None,
+                "remaining_seconds": 0,
+                "earned_xp": 0,
+                "completed_today": completed_today,
+                "completed_total": len(records),
+                "history": [record.to_dict() for record in records[-5:]][::-1],
+            }
+        now = self.monotonic_provider()
+        quest = self._focus_quest
+        elapsed = quest.elapsed_seconds(now)
+        return {
+            "active": True,
+            "paused": quest.paused_since is not None,
+            "duration_minutes": quest.duration_minutes,
+            "remaining_seconds": max(0, int(round(quest.duration_seconds - elapsed))),
+            "earned_xp": max(0, self.state.lifetime.total - quest.start_lifetime_total),
+            "completed_today": completed_today,
+            "completed_total": len(records),
+            "history": [record.to_dict() for record in records[-5:]][::-1],
+        }
+
+    def _refresh_focus_quest_locked(self) -> None:
+        quest = self._focus_quest
+        if quest is None or quest.paused_since is not None:
+            return
+        if quest.elapsed_seconds(self.monotonic_provider()) < quest.duration_seconds:
+            return
+        earned_xp = max(0, self.state.lifetime.total - quest.start_lifetime_total)
+        self.state.focus_quest_history.append(
+            FocusQuestRecord(
+                completed_day_local=self.state.day_local,
+                duration_minutes=quest.duration_minutes,
+                xp_earned=earned_xp,
+            )
+        )
+        self.state.focus_quest_history = self.state.focus_quest_history[
+            -FOCUS_QUEST_HISTORY_LIMIT:
+        ]
+        self._focus_quest = None
+
+    def start_focus_quest(self, duration_minutes: int) -> dict[str, object]:
+        with self.lock:
+            self._roll_day_if_needed_locked()
+            self._refresh_focus_quest_locked()
+            duration = int(duration_minutes)
+            if not MIN_FOCUS_QUEST_MINUTES <= duration <= MAX_FOCUS_QUEST_MINUTES:
+                raise ValueError(
+                    f"Focus quest must be between {MIN_FOCUS_QUEST_MINUTES} and "
+                    f"{MAX_FOCUS_QUEST_MINUTES} minutes"
+                )
+            if self._focus_quest is not None:
+                raise ValueError("Finish or abandon the active focus quest first")
+            self._focus_quest = _ActiveFocusQuest(
+                duration_minutes=duration,
+                started_monotonic=self.monotonic_provider(),
+                start_lifetime_total=self.state.lifetime.total,
+            )
+            return self._focus_summary_locked()
+
+    def set_focus_quest_paused(self, paused: bool) -> dict[str, object]:
+        with self.lock:
+            self._roll_day_if_needed_locked()
+            self._refresh_focus_quest_locked()
+            quest = self._focus_quest
+            if quest is None:
+                raise ValueError("There is no active focus quest")
+            now = self.monotonic_provider()
+            if paused and quest.paused_since is None:
+                quest.paused_since = now
+            elif not paused and quest.paused_since is not None:
+                quest.paused_seconds += max(0.0, now - quest.paused_since)
+                quest.paused_since = None
+            return self._focus_summary_locked()
+
+    def abandon_focus_quest(self) -> dict[str, object]:
+        with self.lock:
+            self._roll_day_if_needed_locked()
+            self._refresh_focus_quest_locked()
+            if self._focus_quest is None:
+                raise ValueError("There is no active focus quest")
+            self._focus_quest = None
+            return self._focus_summary_locked()
 
     def set_daily_goal(self, goal_xp: int) -> int:
         with self.lock:
@@ -240,6 +341,7 @@ class ActivityTracker:
     def snapshot(self) -> dict[str, object]:
         with self.lock:
             self._roll_day_if_needed_locked()
+            self._refresh_focus_quest_locked()
             return {
                 "paused": self.paused,
                 "day_local": self.state.day_local,
@@ -254,11 +356,13 @@ class ActivityTracker:
                 ),
                 "daily_goal_xp": self.state.daily_goal_xp,
                 "daily_history": [entry.to_dict() for entry in self.state.daily_history],
+                "focus": self._focus_summary_locked(),
             }
 
     def save(self) -> None:
         with self.lock:
             self._roll_day_if_needed_locked()
+            self._refresh_focus_quest_locked()
             state_copy = PersistedState(
                 day_local=self.state.day_local,
                 lifetime=MetricTotals.from_mapping(self.state.lifetime.to_dict()),
@@ -267,5 +371,27 @@ class ActivityTracker:
                 scroll_remainder_steps=self.state.scroll_remainder_steps,
                 daily_goal_xp=self.state.daily_goal_xp,
                 daily_history=list(self.state.daily_history),
+                focus_quest_history=list(self.state.focus_quest_history),
             )
         self.store.save(state_copy)
+
+
+@dataclass
+class _ActiveFocusQuest:
+    """Runtime-only timer state; no active timer data is written to disk."""
+
+    duration_minutes: int
+    started_monotonic: float
+    start_lifetime_total: int
+    paused_since: float | None = None
+    paused_seconds: float = 0.0
+
+    @property
+    def duration_seconds(self) -> float:
+        return float(self.duration_minutes * 60)
+
+    def elapsed_seconds(self, now: float) -> float:
+        paused = 0.0
+        if self.paused_since is not None:
+            paused = max(0.0, now - self.paused_since)
+        return max(0.0, now - self.started_monotonic - self.paused_seconds - paused)

@@ -62,6 +62,12 @@ def make_dashboard_payload(snapshot: dict[str, object], saved_at: str | None) ->
         achievements.append("MOMENTUM")
     if total >= 10_000:
         achievements.append("FIVE FIGURES")
+    focus = dict(snapshot.get("focus", {}))
+    focus["history"] = [
+        dict(entry) for entry in focus.get("history", []) if isinstance(entry, dict)
+    ]
+    if int(focus.get("completed_today", 0)):
+        achievements.append("FOCUS COMPLETE")
 
     return {
         "paused": bool(snapshot["paused"]),
@@ -90,6 +96,7 @@ def make_dashboard_payload(snapshot: dict[str, object], saved_at: str | None) ->
             "history": week,
             "achievements": achievements,
         },
+        "focus": focus,
         "last_saved_at": saved_at,
     }
 
@@ -238,6 +245,31 @@ class LocalDashboardServer:
                         owner._tracker.set_daily_goal(int(payload.get("daily_goal_xp", 0)))
                         owner._tracker.save()
                         owner.mark_saved()
+                    except ValueError as exc:
+                        self._json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+                        return
+                elif self.path == "/api/focus/start":
+                    try:
+                        payload = self._body()
+                        owner._tracker.start_focus_quest(int(payload.get("duration_minutes", 0)))
+                    except ValueError as exc:
+                        self._json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+                        return
+                elif self.path == "/api/focus/pause":
+                    try:
+                        owner._tracker.set_focus_quest_paused(True)
+                    except ValueError as exc:
+                        self._json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+                        return
+                elif self.path == "/api/focus/resume":
+                    try:
+                        owner._tracker.set_focus_quest_paused(False)
+                    except ValueError as exc:
+                        self._json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+                        return
+                elif self.path == "/api/focus/abandon":
+                    try:
+                        owner._tracker.abandon_focus_quest()
                     except ValueError as exc:
                         self._json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
                         return

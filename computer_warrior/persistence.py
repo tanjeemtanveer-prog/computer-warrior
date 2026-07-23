@@ -9,8 +9,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from .config import APP_NAME, APP_VERSION, DAILY_HISTORY_DAYS, DEFAULT_DAILY_GOAL_XP, SCHEMA_VERSION
-from .model import DailyHistoryEntry, MetricTotals, PersistedState
+from .config import (
+    APP_NAME,
+    APP_VERSION,
+    DAILY_HISTORY_DAYS,
+    DEFAULT_DAILY_GOAL_XP,
+    FOCUS_QUEST_HISTORY_LIMIT,
+    SCHEMA_VERSION,
+)
+from .model import DailyHistoryEntry, FocusQuestRecord, MetricTotals, PersistedState
 
 
 class PersistenceError(RuntimeError):
@@ -54,6 +61,10 @@ class AtomicJsonStore:
             raise ValueError("daily_history must be a list")
         history = [DailyHistoryEntry.from_mapping(value) for value in history_raw]
         history.sort(key=lambda entry: entry.day_local)
+        focus_history_raw = payload.get("focus_quest_history", [])
+        if not isinstance(focus_history_raw, list):
+            raise ValueError("focus_quest_history must be a list")
+        focus_history = [FocusQuestRecord.from_mapping(value) for value in focus_history_raw]
 
         state = PersistedState(
             day_local=str(payload["day_local"]),
@@ -67,6 +78,7 @@ class AtomicJsonStore:
             ),
             daily_goal_xp=int(payload.get("daily_goal_xp", DEFAULT_DAILY_GOAL_XP)),
             daily_history=history[-DAILY_HISTORY_DAYS:],
+            focus_quest_history=focus_history[-FOCUS_QUEST_HISTORY_LIMIT:],
         )
         state.validate()
         return state
@@ -142,6 +154,7 @@ class AtomicJsonStore:
             "scroll_remainder_steps": round(state.scroll_remainder_steps, 6),
             "daily_goal_xp": state.daily_goal_xp,
             "daily_history": [entry.to_dict() for entry in state.daily_history],
+            "focus_quest_history": [entry.to_dict() for entry in state.focus_quest_history],
         }
 
     @staticmethod

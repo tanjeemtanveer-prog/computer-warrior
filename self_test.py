@@ -70,6 +70,8 @@ def main() -> int:
 - Workers Free CPU-compatible beta password work factor.
 - Local dashboard rank, session-pulse and aggregate activity-mix UI contract.
 - Local daily-goal validation, streak calculation and seven-day aggregate history.
+- Local focus-quest start, pause, completion, aggregate-XP record and restart behavior.
+- Focus-quest dashboard controls and loopback API routes without any Cloudflare upload.
 - Direct loading of v0.0.1-hotfix.1 schema-version-1 stats without XP loss.
 
 ## Test runner output

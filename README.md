@@ -1,6 +1,18 @@
-# Computer Warrior v0.1.0 — Global Leaderboard
+# Computer Warrior v0.1.1 — Focus Quests
 
 A Windows-first activity game core that converts anonymous aggregate input activity into XP. It keeps the CLI dashboard and now also serves a live browser dashboard on this PC only.
+
+## v0.1.1 focus quests
+
+- Adds local 25-minute, 50-minute, and 5–180 minute custom focus quests.
+- A quest shows a running or paused countdown and the aggregate XP earned while
+  it runs. It grants no artificial or bonus XP.
+- Completion stores only the local calendar date, planned duration, and total
+  aggregate XP earned during that quest. Active timers are runtime-only and are
+  not saved across an app restart.
+- The last 20 completed quests stay in the existing local stats file. No quest
+  information is sent to Cloudflare, D1, or the global leaderboard.
+- Needs no D1 migration, secret update, Worker deployment, or `npm install`.
 
 ## v0.1.0 global leaderboard
 

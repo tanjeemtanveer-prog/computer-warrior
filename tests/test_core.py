@@ -37,6 +37,14 @@ class MutableDay:
         return self.value
 
 
+class MutableClock:
+    def __init__(self, value: float = 0.0) -> None:
+        self.value = value
+
+    def __call__(self) -> float:
+        return self.value
+
+
 def dashboard_snapshot(*, paused: bool = False) -> dict[str, object]:
     return {
         "paused": paused,
@@ -224,6 +232,42 @@ class TrackerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Daily goal"):
             self.tracker.set_daily_goal(50_001)
 
+    def test_focus_quest_records_only_duration_day_and_aggregate_xp(self) -> None:
+        clock = MutableClock()
+        tracker = ActivityTracker(AtomicJsonStore(self.path), self.day, clock)
+        quest = tracker.start_focus_quest(5)
+        self.assertTrue(quest["active"])
+        self.assertEqual(quest["remaining_seconds"], 300)
+
+        tracker.on_key_press(FakeKey(vk=65))
+        clock.value = 30
+        paused = tracker.set_focus_quest_paused(True)
+        self.assertTrue(paused["paused"])
+        clock.value = 300
+        self.assertEqual(tracker.snapshot()["focus"]["remaining_seconds"], 270)
+
+        tracker.set_focus_quest_paused(False)
+        clock.value = 570
+        completed = tracker.snapshot()["focus"]
+        self.assertFalse(completed["active"])
+        self.assertEqual(completed["completed_today"], 1)
+        self.assertEqual(completed["history"][0], {
+            "completed_day_local": "2026-07-23",
+            "duration_minutes": 5,
+            "xp_earned": 1,
+        })
+        tracker.save()
+        persisted = AtomicJsonStore(self.path).load("2026-07-23").state
+        self.assertEqual(persisted.focus_quest_history[0].xp_earned, 1)
+
+    def test_focus_quest_rejects_invalid_duration_and_does_not_persist_active_timer(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Focus quest"):
+            self.tracker.start_focus_quest(4)
+        self.tracker.start_focus_quest(25)
+        self.tracker.save()
+        loaded = AtomicJsonStore(self.path).load("2026-07-23").state
+        self.assertEqual(loaded.focus_quest_history, [])
+
     def test_injected_events_are_ignored(self) -> None:
         key = FakeKey(vk=65)
         self.tracker.on_key_press(key, injected=True)
@@ -336,6 +380,20 @@ class OnlineSyncTests(unittest.TestCase):
         self.assertIn("'No data'", page)
         self.assertIn('self.path == "/api/goal"', server)
 
+    def test_dashboard_contains_local_focus_quest_controls(self) -> None:
+        page_path = Path(__file__).resolve().parent.parent / "web" / "index.html"
+        page = page_path.read_text(encoding="utf-8")
+        server = (Path(__file__).resolve().parent.parent / "computer_warrior" / "web.py").read_text(encoding="utf-8")
+        self.assertIn('id="startQuest25"', page)
+        self.assertIn('id="startQuest50"', page)
+        self.assertIn('id="questMinutesInput"', page)
+        self.assertIn('id="questHistory"', page)
+        self.assertIn("function renderFocus(focus)", page)
+        self.assertIn('self.path == "/api/focus/start"', server)
+        self.assertIn('self.path == "/api/focus/abandon"', server)
+        self.assertNotIn("window_title", page.lower())
+        self.assertNotIn("key_sequence", page.lower())
+
     def test_dashboard_contains_opt_in_global_leaderboard_controls(self) -> None:
         page_path = Path(__file__).resolve().parent.parent / "web" / "index.html"
         page = page_path.read_text(encoding="utf-8")
@@ -397,6 +455,28 @@ class OnlineSyncTests(unittest.TestCase):
                 with self.assertRaises(HTTPError) as captured:
                     urlopen(invalid, timeout=2)
                 self.assertEqual(captured.exception.code, 400)
+            finally:
+                server.stop()
+
+    def test_focus_quest_route_starts_a_local_timer(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            tracker = ActivityTracker(AtomicJsonStore(Path(folder) / "stats.json"))
+            manager = OnlineSyncManager(Path(folder) / "online_sync.json")
+            page_path = Path(__file__).resolve().parent.parent / "web" / "index.html"
+            server = LocalDashboardServer(tracker, page_path, 0, manager)
+            server.start()
+            try:
+                request = Request(
+                    server.url + "api/focus/start",
+                    data=b'{"duration_minutes":25}',
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with urlopen(request, timeout=2) as response:
+                    self.assertEqual(response.status, 200)
+                    payload = json.loads(response.read().decode("utf-8"))
+                self.assertTrue(payload["focus"]["active"])
+                self.assertEqual(payload["focus"]["duration_minutes"], 25)
             finally:
                 server.stop()
 

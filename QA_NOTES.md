@@ -1,12 +1,12 @@
-# Computer Warrior v0.1.0 Automated QA Notes
+# Computer Warrior v0.1.1 Automated QA Notes
 
 - Result: **PASS**
-- Generated: 2026-07-23T09:17:12.510298+00:00
+- Generated: 2026-07-23T10:01:40.321830+00:00
 - Python: 3.13.2
 - Platform: Windows-11-10.0.26200-SP0
 - pynput in test environment: 1.8.2
 - Required Windows runtime dependency: pynput 1.8.2+
-- Tests run: 37
+- Tests run: 41
 - Failures: 0
 - Errors: 0
 - Skipped: 0
@@ -37,6 +37,8 @@
 - Workers Free CPU-compatible beta password work factor.
 - Local dashboard rank, session-pulse and aggregate activity-mix UI contract.
 - Local daily-goal validation, streak calculation and seven-day aggregate history.
+- Local focus-quest start, pause, completion, aggregate-XP record and restart behavior.
+- Focus-quest dashboard controls and loopback API routes without any Cloudflare upload.
 - Direct loading of v0.0.1-hotfix.1 schema-version-1 stats without XP loss.
 
 ## Test runner output
@@ -52,8 +54,10 @@ test_beta_invite_code_is_sent_for_registration_but_not_saved (test_core.OnlineSy
 test_daily_goal_route_persists_only_a_local_aggregate_setting (test_core.OnlineSyncTests.test_daily_goal_route_persists_only_a_local_aggregate_setting) ... ok
 test_dashboard_contains_a_beta_invite_field (test_core.OnlineSyncTests.test_dashboard_contains_a_beta_invite_field) ... ok
 test_dashboard_contains_local_daily_goal_and_history_controls (test_core.OnlineSyncTests.test_dashboard_contains_local_daily_goal_and_history_controls) ... ok
+test_dashboard_contains_local_focus_quest_controls (test_core.OnlineSyncTests.test_dashboard_contains_local_focus_quest_controls) ... ok
 test_dashboard_contains_opt_in_global_leaderboard_controls (test_core.OnlineSyncTests.test_dashboard_contains_opt_in_global_leaderboard_controls) ... ok
 test_dashboard_game_loop_uses_only_existing_aggregate_metrics (test_core.OnlineSyncTests.test_dashboard_game_loop_uses_only_existing_aggregate_metrics) ... ok
+test_focus_quest_route_starts_a_local_timer (test_core.OnlineSyncTests.test_focus_quest_route_starts_a_local_timer) ... ok
 test_global_leaderboard_is_opt_in_and_supports_daily_period (test_core.OnlineSyncTests.test_global_leaderboard_is_opt_in_and_supports_daily_period) ... ok
 test_new_xp_is_queued_once_then_synced_once (test_core.OnlineSyncTests.test_new_xp_is_queued_once_then_synced_once) ... ok
 test_normal_sync_batches_five_minutes_without_leaderboard_polling (test_core.OnlineSyncTests.test_normal_sync_batches_five_minutes_without_leaderboard_polling) ... ok
@@ -71,6 +75,8 @@ test_control_keys_toggle_and_quit_without_xp (test_core.TrackerTests.test_contro
 test_cursor_distance_uses_remainder_and_rejects_jump (test_core.TrackerTests.test_cursor_distance_uses_remainder_and_rejects_jump) ... ok
 test_daily_goal_and_aggregate_history_survive_rollover_and_save (test_core.TrackerTests.test_daily_goal_and_aggregate_history_survive_rollover_and_save) ... ok
 test_daily_goal_rejects_values_outside_safe_range (test_core.TrackerTests.test_daily_goal_rejects_values_outside_safe_range) ... ok
+test_focus_quest_records_only_duration_day_and_aggregate_xp (test_core.TrackerTests.test_focus_quest_records_only_duration_day_and_aggregate_xp) ... ok
+test_focus_quest_rejects_invalid_duration_and_does_not_persist_active_timer (test_core.TrackerTests.test_focus_quest_rejects_invalid_duration_and_does_not_persist_active_timer) ... ok
 test_held_key_repeat_is_suppressed (test_core.TrackerTests.test_held_key_repeat_is_suppressed) ... ok
 test_injected_events_are_ignored (test_core.TrackerTests.test_injected_events_are_ignored) ... ok
 test_pause_resume_blocks_all_xp (test_core.TrackerTests.test_pause_resume_blocks_all_xp) ... ok
@@ -81,7 +87,7 @@ test_session_daily_lifetime_and_daily_rollover (test_core.TrackerTests.test_sess
 test_second_instance_is_rejected (test_core.WindowsMutexTests.test_second_instance_is_rejected) ... ok
 
 ----------------------------------------------------------------------
-Ran 37 tests in 1.673s
+Ran 41 tests in 2.020s
 
 OK
 ```
