@@ -251,9 +251,20 @@ class OnlineSyncManager:
         self._save()
         return self._summary_locked()
 
-    def register(self, username: str, password: str, snapshot: Mapping[str, Any], worker_url: str = DEFAULT_WORKER_URL, label: str | None = None) -> dict[str, Any]:
+    def register(
+        self,
+        username: str,
+        password: str,
+        snapshot: Mapping[str, Any],
+        worker_url: str = DEFAULT_WORKER_URL,
+        label: str | None = None,
+        invite_code: str = "",
+    ) -> dict[str, Any]:
         with self._lock:
-            response = self._http_request("POST", worker_url.rstrip("/") + "/api/auth/register", {"username": username, "password": password}, None)
+            payload: dict[str, object] = {"username": username, "password": password}
+            if invite_code.strip():
+                payload["invite_code"] = invite_code.strip()
+            response = self._http_request("POST", worker_url.rstrip("/") + "/api/auth/register", payload, None)
             return self._set_account(response, worker_url, snapshot, label)
 
     def login(self, username: str, password: str, snapshot: Mapping[str, Any], worker_url: str = DEFAULT_WORKER_URL, label: str | None = None) -> dict[str, Any]:

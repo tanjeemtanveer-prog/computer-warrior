@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/wrangler@4/config-schema.json",
+  "name": "computer-warrior-beta",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-23",
+  "workers_dev": true,
+  "vars": {
+    "APP_ENV": "beta",
+    "INVITE_ONLY": "true"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "computer-warrior-beta",
+      "database_id": "3baec436-8505-4081-8508-a37821665d64",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

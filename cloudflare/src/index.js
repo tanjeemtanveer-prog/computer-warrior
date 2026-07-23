@@ -1,6 +1,10 @@
 const encoder = new TextEncoder();
-const PASSWORD_ITERATIONS = 100_000;
+const LOCAL_PASSWORD_ITERATIONS = 100_000;
+const BETA_PASSWORD_ITERATIONS = 310_000;
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
+const AUTH_WINDOW_MS = 15 * 60 * 1000;
+const AUTH_MAX_ATTEMPTS = 8;
+const AUTH_BLOCK_MS = 15 * 60 * 1000;
 const ALLOWED_LOCAL_ORIGINS = new Set([
   "http://127.0.0.1:8765",
   "http://localhost:8765",
@@ -10,6 +14,35 @@ const ALLOWED_LOCAL_ORIGINS = new Set([
 
 function now() {
   return new Date().toISOString();
+}
+
+function isPrivateBeta(env) {
+  return env?.APP_ENV === "beta";
+}
+
+function inviteOnly(env) {
+  return env?.INVITE_ONLY === "true";
+}
+
+function passwordIterations(env) {
+  return isPrivateBeta(env) ? BETA_PASSWORD_ITERATIONS : LOCAL_PASSWORD_ITERATIONS;
+}
+
+function requiredSecret(env, name) {
+  const value = env?.[name];
+  if (typeof value === "string" && value.length >= 32) return value;
+  if (isPrivateBeta(env)) throw new Error(`Missing required Worker secret: ${name}`);
+  return "";
+}
+
+function constantTimeEqual(left, right) {
+  if (typeof left !== "string" || typeof right !== "string") return false;
+  const length = Math.max(left.length, right.length, 1);
+  let difference = left.length ^ right.length;
+  for (let index = 0; index < length; index += 1) {
+    difference |= (left.charCodeAt(index % left.length) || 0) ^ (right.charCodeAt(index % right.length) || 0);
+  }
+  return difference === 0;
 }
 
 function json(data, status = 200, request, env) {
@@ -58,15 +91,41 @@ async function sha256(value) {
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-async function passwordHash(password, saltBase64) {
+async function passwordHash(password, saltBase64, env) {
   const salt = Uint8Array.from(atob(saltBase64), (char) => char.charCodeAt(0));
-  const material = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
+  const pepper = requiredSecret(env, "AUTH_PEPPER");
+  const material = await crypto.subtle.importKey("raw", encoder.encode(pepper ? `${password}\u0000${pepper}` : password), "PBKDF2", false, ["deriveBits"]);
   const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", hash: "SHA-256", salt, iterations: PASSWORD_ITERATIONS },
+    { name: "PBKDF2", hash: "SHA-256", salt, iterations: passwordIterations(env) },
     material,
     256,
   );
   return base64(new Uint8Array(bits));
+}
+
+async function sessionTokenHash(token, env) {
+  const pepper = requiredSecret(env, "AUTH_PEPPER");
+  return pepper ? sha256(`session-v1:${pepper}:${token}`) : sha256(token);
+}
+
+async function throttleAuth(request, env, operation) {
+  if (!isPrivateBeta(env)) return null;
+  const ip = request.headers.get("CF-Connecting-IP") || request.headers.get("x-forwarded-for") || "unknown";
+  const bucket = await sha256(`auth-v1:${requiredSecret(env, "AUTH_PEPPER")}:${operation}:${ip}`);
+  const timestamp = Date.now();
+  const existing = await env.DB.prepare(
+    "SELECT window_started_at, attempt_count, blocked_until FROM auth_rate_limits WHERE bucket = ?",
+  ).bind(bucket).first();
+  if (existing && Number(existing.blocked_until) > timestamp) {
+    return Math.ceil((Number(existing.blocked_until) - timestamp) / 1000);
+  }
+  const newWindow = !existing || timestamp - Number(existing.window_started_at) >= AUTH_WINDOW_MS;
+  const attempts = newWindow ? 1 : Number(existing.attempt_count) + 1;
+  const blockedUntil = attempts > AUTH_MAX_ATTEMPTS ? timestamp + AUTH_BLOCK_MS : 0;
+  await env.DB.prepare(
+    "INSERT INTO auth_rate_limits (bucket, window_started_at, attempt_count, blocked_until, updated_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(bucket) DO UPDATE SET window_started_at = excluded.window_started_at, attempt_count = excluded.attempt_count, blocked_until = excluded.blocked_until, updated_at = excluded.updated_at",
+  ).bind(bucket, newWindow ? timestamp : Number(existing.window_started_at), attempts, blockedUntil, timestamp).run();
+  return blockedUntil ? Math.ceil(AUTH_BLOCK_MS / 1000) : null;
 }
 
 function validUsername(value) {
@@ -130,7 +189,7 @@ async function accountFromRequest(request, env) {
   const header = request.headers.get("authorization") || "";
   const match = /^Bearer ([A-Za-z0-9_-]{30,})$/.exec(header);
   if (!match) return null;
-  const tokenHash = await sha256(match[1]);
+  const tokenHash = await sessionTokenHash(match[1], env);
   const result = await env.DB.prepare(
     "SELECT a.id, a.username FROM sessions s JOIN accounts a ON a.id = s.account_id WHERE s.token_hash = ? AND s.expires_at > ?",
   ).bind(tokenHash, now()).first();
@@ -146,10 +205,18 @@ async function accountSummary(env, accountId) {
 
 async function register(request, env) {
   const payload = await body(request);
+  const retryAfter = await throttleAuth(request, env, "register");
+  if (retryAfter) return error(`Too many account attempts. Try again in ${retryAfter} seconds`, 429, request, env, "auth_rate_limited");
   if (!validUsername(payload.username)) return error("Username must contain 3–24 letters, numbers, or underscores", 400, request, env, "invalid_username");
   if (typeof payload.password !== "string" || payload.password.length < 10 || payload.password.length > 256) return error("Password must be 10–256 characters", 400, request, env, "invalid_password");
+  if (inviteOnly(env)) {
+    const inviteCode = typeof payload.invite_code === "string" ? payload.invite_code.trim() : "";
+    if (!constantTimeEqual(inviteCode, requiredSecret(env, "INVITE_CODE"))) {
+      return error("A valid beta invite code is required", 403, request, env, "invite_required");
+    }
+  }
   const salt = base64(crypto.getRandomValues(new Uint8Array(16)));
-  const hash = await passwordHash(payload.password, salt);
+  const hash = await passwordHash(payload.password, salt, env);
   const accountId = crypto.randomUUID();
   const createdAt = now();
   try {
@@ -169,16 +236,18 @@ async function createSession(request, env, accountId, username, status = 200) {
   const createdAt = now();
   const expiresAt = new Date(Date.now() + SESSION_TTL_SECONDS * 1000).toISOString();
   await env.DB.prepare("INSERT INTO sessions (token_hash, account_id, expires_at, created_at) VALUES (?, ?, ?, ?)")
-    .bind(await sha256(token), accountId, expiresAt, createdAt).run();
+    .bind(await sessionTokenHash(token, env), accountId, expiresAt, createdAt).run();
   return json({ token, expires_at: expiresAt, account: { id: accountId, username } }, status, request, env);
 }
 
 async function login(request, env) {
   const payload = await body(request);
+  const retryAfter = await throttleAuth(request, env, "login");
+  if (retryAfter) return error(`Too many sign-in attempts. Try again in ${retryAfter} seconds`, 429, request, env, "auth_rate_limited");
   if (typeof payload.username !== "string" || typeof payload.password !== "string") return error("Username and password are required", 400, request, env, "invalid_credentials");
   const account = await env.DB.prepare("SELECT id, username, password_salt, password_hash FROM accounts WHERE username = ?")
     .bind(payload.username.trim()).first();
-  if (!account || await passwordHash(payload.password, account.password_salt) !== account.password_hash) return error("Invalid username or password", 401, request, env, "invalid_credentials");
+  if (!account || await passwordHash(payload.password, account.password_salt, env) !== account.password_hash) return error("Invalid username or password", 401, request, env, "invalid_credentials");
   return createSession(request, env, account.id, account.username);
 }
 
@@ -261,7 +330,7 @@ async function route(request, env) {
   if (!account) return error("Sign in is required", 401, request, env, "unauthorized");
   if (request.method === "POST" && url.pathname === "/api/auth/logout") {
     const token = request.headers.get("authorization").slice(7);
-    await env.DB.prepare("DELETE FROM sessions WHERE token_hash = ?").bind(await sha256(token)).run();
+    await env.DB.prepare("DELETE FROM sessions WHERE token_hash = ?").bind(await sessionTokenHash(token, env)).run();
     return json({ ok: true }, 200, request, env);
   }
   if (request.method === "GET" && url.pathname === "/api/me") return json({ account, totals: await accountSummary(env, account.id) }, 200, request, env);
@@ -284,4 +353,4 @@ export default {
 };
 
 export { route };
-export const __test = { canonicalSync, syncPayload, validDeviceId, validUsername };
+export const __test = { canonicalSync, constantTimeEqual, inviteOnly, isPrivateBeta, sessionTokenHash, syncPayload, validDeviceId, validUsername };

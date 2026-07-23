@@ -1,11 +1,13 @@
 {
   "name": "computer-warrior-cloudflare-local",
   "private": true,
-  "version": "0.0.6",
+  "version": "0.0.7",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --local --port 8787",
     "db:migrate": "wrangler d1 migrations apply computer-warrior-local --local",
+    "db:migrate:beta": "wrangler d1 migrations apply DB --remote --config wrangler.beta.jsonc",
+    "deploy:beta": "wrangler deploy --config wrangler.beta.jsonc",
     "check": "node --check src/index.js",
     "test": "node --test test/*.test.js"
   },

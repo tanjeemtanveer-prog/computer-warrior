@@ -1,12 +1,12 @@
-# Computer Warrior v0.0.6 Automated QA Notes
+# Computer Warrior v0.0.7 Automated QA Notes
 
 - Result: **PASS**
-- Generated: 2026-07-23T04:56:01.293826+00:00
+- Generated: 2026-07-23T05:44:03.438084+00:00
 - Python: 3.13.2
 - Platform: Windows-11-10.0.26200-SP0
 - pynput in test environment: 1.8.2
 - Required Windows runtime dependency: pynput 1.8.2+
-- Tests run: 27
+- Tests run: 29
 - Failures: 0
 - Errors: 0
 - Skipped: 0
@@ -31,6 +31,8 @@
 - Five-minute online XP batching without automatic leaderboard polling.
 - Immediate manual aggregation, immutable retry entries and account switching safety.
 - Migration of legacy plaintext session state into a non-serialized credential store.
+- Beta invite-code forwarding without serializing the invite in local state.
+- Beta dashboard invite field and private Worker configuration separation.
 - Direct loading of v0.0.1-hotfix.1 schema-version-1 stats without XP loss.
 
 ## Test runner output
@@ -42,6 +44,8 @@ test_dashboard_shows_categories_before_totals_for_every_scope (test_core.Dashboa
 test_dashboard_visibly_changes_to_paused (test_core.DashboardTests.test_dashboard_visibly_changes_to_paused) ... ok
 test_live_dashboard_rewrites_fixed_rows_and_skips_duplicates (test_core.DashboardTests.test_live_dashboard_rewrites_fixed_rows_and_skips_duplicates) ... ok
 test_web_payload_exposes_only_aggregate_dashboard_values (test_core.DashboardTests.test_web_payload_exposes_only_aggregate_dashboard_values) ... ok
+test_beta_invite_code_is_sent_for_registration_but_not_saved (test_core.OnlineSyncTests.test_beta_invite_code_is_sent_for_registration_but_not_saved) ... ok
+test_dashboard_contains_a_beta_invite_field (test_core.OnlineSyncTests.test_dashboard_contains_a_beta_invite_field) ... ok
 test_new_xp_is_queued_once_then_synced_once (test_core.OnlineSyncTests.test_new_xp_is_queued_once_then_synced_once) ... ok
 test_normal_sync_batches_five_minutes_without_leaderboard_polling (test_core.OnlineSyncTests.test_normal_sync_batches_five_minutes_without_leaderboard_polling) ... ok
 test_online_refresh_route_returns_json_instead_of_an_html_404 (test_core.OnlineSyncTests.test_online_refresh_route_returns_json_instead_of_an_html_404) ... ok
@@ -65,7 +69,7 @@ test_session_daily_lifetime_and_daily_rollover (test_core.TrackerTests.test_sess
 test_second_instance_is_rejected (test_core.WindowsMutexTests.test_second_instance_is_rejected) ... ok
 
 ----------------------------------------------------------------------
-Ran 27 tests in 1.048s
+Ran 29 tests in 1.119s
 
 OK
 ```

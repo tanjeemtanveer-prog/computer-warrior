@@ -1,0 +1,4 @@
+# Copy this file to .dev.vars for local development only. Do not commit .dev.vars.
+# Use independent random values; the beta Worker receives its values through `wrangler secret put`.
+AUTH_PEPPER=replace-with-at-least-32-random-characters
+INVITE_CODE=replace-with-a-long-random-beta-invite-code

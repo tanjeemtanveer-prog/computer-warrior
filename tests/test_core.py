@@ -395,6 +395,38 @@ class OnlineSyncTests(unittest.TestCase):
             self.assertEqual(manager.summary()["username"], "second_user")
             self.assertEqual(manager.summary()["pending_count"], 0)
 
+    def test_beta_invite_code_is_sent_for_registration_but_not_saved(self) -> None:
+        calls: list[dict[str, object]] = []
+
+        def worker(method: str, url: str, payload: dict[str, object] | None, token: str | None) -> dict[str, object]:
+            if url.endswith("/api/auth/register"):
+                calls.append(dict(payload or {}))
+                return {"token": "i" * 40, "account": {"username": "beta_user"}}
+            if url.endswith("/api/devices"):
+                return {"device": {"id": payload["device_id"]}}
+            raise AssertionError(f"Unexpected worker call: {method} {url}")
+
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "online_sync.json"
+            manager = OnlineSyncManager(path, worker)
+            manager.register(
+                "beta_user",
+                "not-saved-password",
+                {"lifetime": {}},
+                "http://worker.test",
+                "Test laptop",
+                "invite-code-not-saved",
+            )
+            self.assertEqual(calls[0]["invite_code"], "invite-code-not-saved")
+            self.assertNotIn("invite-code-not-saved", path.read_text(encoding="utf-8"))
+
+    def test_dashboard_contains_a_beta_invite_field(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "web" / "index.html").read_text(encoding="utf-8")
+        server = (root / "computer_warrior" / "web.py").read_text(encoding="utf-8")
+        self.assertIn('id="onlineInviteCode"', page)
+        self.assertIn('payload.get("invite_code", "")', server)
+
 
 class PersistenceTests(unittest.TestCase):
     def test_v001_stats_file_loads_without_migration_or_xp_loss(self) -> None:

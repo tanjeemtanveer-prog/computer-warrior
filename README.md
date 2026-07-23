@@ -1,8 +1,8 @@
-# Computer Warrior v0.0.6 — Secure Local Session + Git Foundation
+# Computer Warrior v0.0.7 — Private Beta Hardening
 
 A Windows-first activity game core that converts anonymous aggregate input activity into XP. It keeps the CLI dashboard and now also serves a live browser dashboard on this PC only.
 
-## Cloudflare local database foundation
+## Private Cloudflare beta foundation
 
 The new `cloudflare/` folder contains the online-account backend, tested against
 Wrangler's **local D1 database**. It has accounts, account sessions, device
@@ -12,7 +12,22 @@ account, or change the Python tracker’s privacy boundary.
 
 Start with [cloudflare/README.md](cloudflare/README.md). The Python tracker is
 now wired to this local API through a durable, device-specific offline queue.
-It has not been deployed to Cloudflare.
+The committed `wrangler.jsonc` stays local-only. A separate
+`cloudflare/wrangler.beta.jsonc` binds only the private beta Worker to the new
+remote APAC D1 database. The beta is not deployed until secrets, remote
+migration, and two-device QA are completed.
+
+## v0.0.7 beta hardening
+
+- Registration can be closed behind a private invite code.
+- Remote password and session hashes are peppered with a Worker secret that is
+  never committed to Git or returned to the dashboard.
+- Beta registration and login attempts are throttled by a hashed client
+  address.
+- The dashboard sends an invite code only during registration and clears it
+  afterwards; it never serializes that code in `online_sync.json`.
+- Local development remains compatible with existing local accounts and local
+  D1 state.
 
 ## v0.0.6 online sync
 

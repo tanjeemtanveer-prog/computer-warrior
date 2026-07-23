@@ -1,11 +1,13 @@
 # Release and private Cloudflare beta plan
 
-## Complete in v0.0.6
+## Complete in v0.0.7
 
 - Windows Credential Manager holds the local Worker session token.
 - online_sync.json contains no session token.
 - Git ignores local state, secrets, dependencies and generated releases.
 - Python and Worker tests run from one verification script.
+- The beta Worker has a separate configuration, invite-only registration,
+  server-held auth/session peppering, and small private-beta auth throttling.
 
 ## Required before remote deployment
 
@@ -13,10 +15,11 @@
 2. Create a private Git repository and push the tested source.
 3. Create a separate remote D1 database. Do not reuse or expose the local
    development database.
-4. Configure production Worker secrets through Wrangler; never place them in
-   source files or Git.
-5. Deploy a private Worker URL first and create a new remote test account.
-6. Keep registration invite-only until two-device sync, logout, expiry and
+4. Configure beta Worker secrets through Wrangler; never place them in source
+   files or Git.
+5. Apply both D1 migrations to the remote beta database.
+6. Deploy a private Worker URL first and create a new remote test account.
+7. Keep registration invite-only until two-device sync, logout, expiry and
    recovery tests pass.
 
 ## Website scope after the private beta

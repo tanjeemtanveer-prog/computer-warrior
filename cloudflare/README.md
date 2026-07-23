@@ -1,4 +1,4 @@
-# Computer Warrior — local Cloudflare D1 backend
+# Computer Warrior — Cloudflare D1 backend
 
 This folder is the v0.0.4 online-account foundation. It runs entirely on this
 computer until you deliberately create and deploy a real D1 database.
@@ -47,9 +47,37 @@ will be the next update, after we verify the local Worker/D1 account flow in a
 browser or API test. That prevents the tracker from uploading to an untested
 backend.
 
-## Before deployment
+## Private beta deployment configuration
 
-Do not deploy this local configuration. Create a real D1 database, replace the
-placeholder `database_id`, set a production `APP_ORIGIN`, and add the browser
-account/sync UI. Production also needs stronger login throttling and a server
-secret/session-cookie design.
+`wrangler.jsonc` remains local-only and always uses a local D1 database.
+`wrangler.beta.jsonc` is the separate private-beta Worker configuration. It
+binds `env.DB` to the remote APAC database `computer-warrior-beta`; never add
+that binding to the local configuration.
+
+Before the first beta migration or deploy, create two Worker secrets. Generate
+different random values with at least 32 characters. `AUTH_PEPPER` protects
+remote password/session hashes and `INVITE_CODE` is required only for account
+creation while beta access is closed:
+
+```powershell
+npx wrangler secret put AUTH_PEPPER --config wrangler.beta.jsonc
+npx wrangler secret put INVITE_CODE --config wrangler.beta.jsonc
+```
+
+Never put either value in `wrangler.beta.jsonc`, `.dev.vars.example`, Git, a
+screen recording, or a chat message. For local development you may copy
+`.dev.vars.example` to ignored `.dev.vars` and use unrelated development-only
+values.
+
+The beta Worker enforces an invite code for registration, uses a server-held
+pepper for remote password/session hashes, and throttles registration and login
+attempts per hashed client address. It is a small private-beta guardrail, not a
+replacement for Cloudflare edge DDoS protection.
+
+The remote commands are deliberately separate and must be run only after local
+tests pass:
+
+```powershell
+npm run db:migrate:beta
+npm run deploy:beta
+```

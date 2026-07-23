@@ -130,10 +130,11 @@ class LocalDashboardServer:
                     snapshot = owner._tracker.snapshot()
                     username = str(payload.get("username", ""))
                     password = str(payload.get("password", ""))
+                    invite_code = str(payload.get("invite_code", ""))
                     worker_url = str(payload.get("worker_url", "http://127.0.0.1:8787"))
                     label = str(payload.get("device_label", "")) or None
                     if action == "register":
-                        result = owner._online_sync.register(username, password, snapshot, worker_url, label)
+                        result = owner._online_sync.register(username, password, snapshot, worker_url, label, invite_code)
                     elif action == "login":
                         result = owner._online_sync.login(username, password, snapshot, worker_url, label)
                     elif action == "sync":
