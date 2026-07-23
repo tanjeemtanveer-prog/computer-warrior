@@ -1,6 +1,18 @@
-# Computer Warrior v0.0.9.1 — Daily Momentum chart fix
+# Computer Warrior v0.1.0 — Global Leaderboard
 
 A Windows-first activity game core that converts anonymous aggregate input activity into XP. It keeps the CLI dashboard and now also serves a live browser dashboard on this PC only.
+
+## v0.1.0 global leaderboard
+
+- Adds opt-in global lifetime and current UTC-day leaderboards.
+- Shows the top 25 public accounts plus the signed-in participant's rank when
+  it falls below the top 25.
+- Shows only username, rank and accepted aggregate XP. It never publishes a
+  device ID, label, session token, event data, typed content or coordinates.
+- New accounts and existing beta accounts are private until the user explicitly
+  enables leaderboard visibility.
+- Requires D1 migration `0003_global_leaderboard_visibility.sql` and a Worker
+  deployment. Existing local XP and sync queues remain unchanged.
 
 ## v0.0.9.1 daily momentum chart fix
 

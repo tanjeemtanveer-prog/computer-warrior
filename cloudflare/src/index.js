@@ -195,7 +195,7 @@ async function accountFromRequest(request, env) {
   if (!match) return null;
   const tokenHash = await sessionTokenHash(match[1], env);
   const result = await env.DB.prepare(
-    "SELECT a.id, a.username FROM sessions s JOIN accounts a ON a.id = s.account_id WHERE s.token_hash = ? AND s.expires_at > ?",
+    "SELECT a.id, a.username, a.leaderboard_visible FROM sessions s JOIN accounts a ON a.id = s.account_id WHERE s.token_hash = ? AND s.expires_at > ?",
   ).bind(tokenHash, now()).first();
   return result || null;
 }
@@ -307,19 +307,90 @@ async function sync(request, env, account) {
   return json({ accepted: true, idempotent: false, entry: { sequence: item.sequence, total_xp: item.total, status: "verified" }, totals: await accountSummary(env, account.id) }, 201, request, env);
 }
 
-async function leaderboard(request, env) {
-  const period = new URL(request.url).searchParams.get("period") || "lifetime";
-  let results;
-  if (period === "lifetime") {
-    ({ results } = await env.DB.prepare("SELECT a.username, t.verified_total FROM account_totals t JOIN accounts a ON a.id = t.account_id WHERE t.verified_total > 0 ORDER BY t.verified_total DESC, a.username ASC LIMIT 100").all());
-  } else if (period === "daily") {
-    const day = new URL(request.url).searchParams.get("day") || new Date().toISOString().slice(0, 10);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return error("day must be YYYY-MM-DD", 400, request, env, "invalid_day");
-    ({ results } = await env.DB.prepare("SELECT a.username, d.verified_total FROM account_daily_totals d JOIN accounts a ON a.id = d.account_id WHERE d.day_utc = ? AND d.verified_total > 0 ORDER BY d.verified_total DESC, a.username ASC LIMIT 100").bind(day).all());
-  } else {
-    return error("period must be lifetime or daily", 400, request, env, "invalid_period");
+function leaderboardPeriod(value) {
+  return value === "lifetime" || value === "daily" ? value : null;
+}
+
+function leaderboardDay(url, period) {
+  if (period !== "daily") return null;
+  const day = url.searchParams.get("day") || new Date().toISOString().slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : null;
+}
+
+function leaderboardSource(period) {
+  if (period === "daily") {
+    return {
+      from: "account_daily_totals t JOIN accounts a ON a.id = t.account_id",
+      dayWhere: "t.day_utc = ? AND ",
+    };
   }
-  return json({ period, leaderboard: results.map((row, index) => ({ rank: index + 1, username: row.username, verified_total: row.verified_total })) }, 200, request, env);
+  return {
+    from: "account_totals t JOIN accounts a ON a.id = t.account_id",
+    dayWhere: "",
+  };
+}
+
+async function leaderboardRows(env, period, day) {
+  const source = leaderboardSource(period);
+  const statement = env.DB.prepare(
+    `SELECT a.username, t.verified_total FROM ${source.from} WHERE ${source.dayWhere}a.leaderboard_visible = 1 AND t.verified_total > 0 ORDER BY t.verified_total DESC, a.username COLLATE NOCASE ASC LIMIT 25`,
+  );
+  const response = day ? await statement.bind(day).all() : await statement.all();
+  return (response.results || []).map((row, index) => ({
+    rank: index + 1,
+    username: row.username,
+    accepted_total: Number(row.verified_total),
+  }));
+}
+
+async function globalRank(env, period, day, account, acceptedTotal) {
+  if (!account.leaderboard_visible || acceptedTotal <= 0) return null;
+  const source = leaderboardSource(period);
+  const statement = env.DB.prepare(
+    `SELECT 1 + COUNT(*) AS rank FROM ${source.from} WHERE ${source.dayWhere}a.leaderboard_visible = 1 AND t.verified_total > 0 AND (t.verified_total > ? OR (t.verified_total = ? AND a.username COLLATE NOCASE < ?))`,
+  );
+  const values = day ? [day, acceptedTotal, acceptedTotal, account.username] : [acceptedTotal, acceptedTotal, account.username];
+  const result = await statement.bind(...values).first();
+  return Number(result?.rank || 1);
+}
+
+async function leaderboardPayload(request, env, account = null) {
+  const url = new URL(request.url);
+  const period = leaderboardPeriod(url.searchParams.get("period") || "lifetime");
+  if (!period) return error("period must be lifetime or daily", 400, request, env, "invalid_period");
+  const day = leaderboardDay(url, period);
+  if (period === "daily" && !day) return error("day must be YYYY-MM-DD", 400, request, env, "invalid_day");
+  const payload = { period, ...(day ? { day_utc: day } : {}), leaderboard: await leaderboardRows(env, period, day) };
+  if (account) {
+    const totals = period === "lifetime"
+      ? await accountSummary(env, account.id)
+      : await env.DB.prepare("SELECT verified_total FROM account_daily_totals WHERE account_id = ? AND day_utc = ?").bind(account.id, day).first();
+    const acceptedTotal = Number(totals?.verified_total || 0);
+    payload.me = {
+      username: account.username,
+      visible: Boolean(account.leaderboard_visible),
+      rank: await globalRank(env, period, day, account, acceptedTotal),
+      accepted_total: acceptedTotal,
+    };
+  }
+  return payload;
+}
+
+async function leaderboard(request, env) {
+  const payload = await leaderboardPayload(request, env);
+  return payload instanceof Response ? payload : json(payload, 200, request, env);
+}
+
+async function leaderboardForAccount(request, env, account) {
+  const payload = await leaderboardPayload(request, env, account);
+  return payload instanceof Response ? payload : json(payload, 200, request, env);
+}
+
+async function setLeaderboardVisibility(request, env, account) {
+  const payload = await body(request);
+  if (typeof payload.public_visible !== "boolean") return error("public_visible must be true or false", 400, request, env, "invalid_visibility");
+  await env.DB.prepare("UPDATE accounts SET leaderboard_visible = ? WHERE id = ?").bind(payload.public_visible ? 1 : 0, account.id).run();
+  return json({ account: { username: account.username, leaderboard_visible: payload.public_visible } }, 200, request, env);
 }
 
 async function route(request, env) {
@@ -337,7 +408,9 @@ async function route(request, env) {
     await env.DB.prepare("DELETE FROM sessions WHERE token_hash = ?").bind(await sessionTokenHash(token, env)).run();
     return json({ ok: true }, 200, request, env);
   }
-  if (request.method === "GET" && url.pathname === "/api/me") return json({ account, totals: await accountSummary(env, account.id) }, 200, request, env);
+  if (request.method === "GET" && url.pathname === "/api/me") return json({ account: { id: account.id, username: account.username, leaderboard_visible: Boolean(account.leaderboard_visible) }, totals: await accountSummary(env, account.id) }, 200, request, env);
+  if (request.method === "GET" && url.pathname === "/api/leaderboard/me") return leaderboardForAccount(request, env, account);
+  if (request.method === "POST" && url.pathname === "/api/me/leaderboard-visibility") return setLeaderboardVisibility(request, env, account);
   if (request.method === "POST" && url.pathname === "/api/devices") return createDevice(request, env, account);
   if (request.method === "GET" && url.pathname === "/api/devices") return listDevices(request, env, account);
   if (request.method === "POST" && url.pathname === "/api/sync") return sync(request, env, account);
@@ -357,4 +430,4 @@ export default {
 };
 
 export { route };
-export const __test = { canonicalSync, constantTimeEqual, inviteOnly, isPrivateBeta, passwordIterations, sessionTokenHash, syncPayload, validDeviceId, validUsername };
+export const __test = { canonicalSync, constantTimeEqual, inviteOnly, isPrivateBeta, leaderboardDay, leaderboardPeriod, passwordIterations, sessionTokenHash, syncPayload, validDeviceId, validUsername };

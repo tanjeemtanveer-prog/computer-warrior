@@ -68,6 +68,10 @@ def _default_state() -> dict[str, Any]:
         "last_leaderboard_at": None,
         "account_totals": None,
         "leaderboard": [],
+        "leaderboard_period": "lifetime",
+        "leaderboard_day_utc": None,
+        "leaderboard_me": None,
+        "leaderboard_visible": False,
     }
 
 
@@ -222,6 +226,10 @@ class OnlineSyncManager:
             "last_leaderboard_at": self._state.get("last_leaderboard_at"),
             "account_totals": self._state.get("account_totals"),
             "leaderboard": self._state.get("leaderboard", []),
+            "leaderboard_period": self._state.get("leaderboard_period", "lifetime"),
+            "leaderboard_day_utc": self._state.get("leaderboard_day_utc"),
+            "leaderboard_me": self._state.get("leaderboard_me"),
+            "leaderboard_visible": bool(self._state.get("leaderboard_visible", False)),
         }
 
     def summary(self) -> dict[str, Any]:
@@ -387,9 +395,7 @@ class OnlineSyncManager:
                 self._state["last_synced_at"] = self._timestamp()
                 synced_any = True
             if refresh_leaderboard and (synced_any or not self._state.get("leaderboard")):
-                response = self._http_request("GET", self._url("/api/leaderboard?period=lifetime"), None, None)
-                self._state["leaderboard"] = list(response.get("leaderboard") or [])[:10]
-                self._state["last_leaderboard_at"] = self._timestamp()
+                self._refresh_leaderboard_locked()
             self._state["last_error"] = None
         except OnlineSyncError as exc:
             self._state["last_error"] = str(exc)
@@ -415,15 +421,54 @@ class OnlineSyncManager:
             self._save()
             return self._summary_locked()
 
-    def refresh_leaderboard(self) -> dict[str, Any]:
-        """Fetch leaderboard only when the user opens the online panel."""
+    def _refresh_leaderboard_locked(self, period: str = "lifetime") -> None:
+        if period not in {"lifetime", "daily"}:
+            raise OnlineSyncError("Leaderboard period must be lifetime or daily")
+        token = self._session_token_locked()
+        if not token:
+            raise OnlineSyncError("Sign in is required")
+        response = self._http_request("GET", self._url(f"/api/leaderboard/me?period={period}"), None, token)
+        self._state["leaderboard"] = list(response.get("leaderboard") or [])[:25]
+        self._state["leaderboard_period"] = str(response.get("period") or period)
+        self._state["leaderboard_day_utc"] = response.get("day_utc")
+        self._state["leaderboard_me"] = response.get("me") if isinstance(response.get("me"), Mapping) else None
+        me = self._state["leaderboard_me"]
+        self._state["leaderboard_visible"] = bool(me.get("visible")) if isinstance(me, Mapping) else False
+        self._state["last_leaderboard_at"] = self._timestamp()
+
+    def refresh_leaderboard(self, period: str = "lifetime") -> dict[str, Any]:
+        """Fetch the selected global leaderboard only when the user asks for it."""
         with self._lock:
             if not self._session_token_locked():
                 return self._summary_locked()
             try:
-                response = self._http_request("GET", self._url("/api/leaderboard?period=lifetime"), None, None)
-                self._state["leaderboard"] = list(response.get("leaderboard") or [])[:10]
-                self._state["last_leaderboard_at"] = self._timestamp()
+                self._refresh_leaderboard_locked(period)
+                self._state["last_error"] = None
+            except OnlineSyncError as exc:
+                self._state["last_error"] = str(exc)
+            self._save()
+            return self._summary_locked()
+
+    def set_leaderboard_visibility(self, public_visible: object) -> dict[str, Any]:
+        """Opt in or out without exposing a device identifier to the board."""
+        if not isinstance(public_visible, bool):
+            raise OnlineSyncError("Leaderboard visibility must be true or false")
+        with self._lock:
+            token = self._session_token_locked()
+            if not token:
+                return self._summary_locked()
+            try:
+                response = self._http_request(
+                    "POST",
+                    self._url("/api/me/leaderboard-visibility"),
+                    {"public_visible": public_visible},
+                    token,
+                )
+                account = response.get("account")
+                self._state["leaderboard_visible"] = bool(
+                    account.get("leaderboard_visible") if isinstance(account, Mapping) else public_visible
+                )
+                self._refresh_leaderboard_locked(str(self._state.get("leaderboard_period") or "lifetime"))
                 self._state["last_error"] = None
             except OnlineSyncError as exc:
                 self._state["last_error"] = str(exc)

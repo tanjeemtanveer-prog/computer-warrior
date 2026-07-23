@@ -336,6 +336,18 @@ class OnlineSyncTests(unittest.TestCase):
         self.assertIn("'No data'", page)
         self.assertIn('self.path == "/api/goal"', server)
 
+    def test_dashboard_contains_opt_in_global_leaderboard_controls(self) -> None:
+        page_path = Path(__file__).resolve().parent.parent / "web" / "index.html"
+        page = page_path.read_text(encoding="utf-8")
+        server = (Path(__file__).resolve().parent.parent / "computer_warrior" / "web.py").read_text(encoding="utf-8")
+        self.assertIn('id="lifetimeLeaderboard"', page)
+        self.assertIn('id="dailyLeaderboard"', page)
+        self.assertIn('id="leaderboardVisibility"', page)
+        self.assertIn("accepted XP", page)
+        self.assertIn("'/api/online/visibility'", page)
+        self.assertIn('self.path == "/api/online/leaderboard"', server)
+        self.assertIn('self.path == "/api/online/visibility"', server)
+
     def test_online_refresh_route_returns_json_instead_of_an_html_404(self) -> None:
         with tempfile.TemporaryDirectory() as folder:
             tracker = ActivityTracker(AtomicJsonStore(Path(folder) / "stats.json"))
@@ -406,6 +418,58 @@ class OnlineSyncTests(unittest.TestCase):
             self.assertEqual(summary["pending_count"], 1)
             self.assertEqual(summary["pending_xp"], 3)
             self.assertIn("unavailable", summary["last_error"])
+
+    def test_global_leaderboard_is_opt_in_and_supports_daily_period(self) -> None:
+        class MemoryCredentials:
+            def __init__(self) -> None:
+                self.values: dict[str, str] = {}
+
+            def read(self, target: str) -> str | None:
+                return self.values.get(target)
+
+            def write(self, target: str, token: str) -> None:
+                self.values[target] = token
+
+            def delete(self, target: str) -> None:
+                self.values.pop(target, None)
+
+        calls: list[tuple[str, str, dict[str, object] | None, str | None]] = []
+
+        def worker(method: str, url: str, payload: dict[str, object] | None, token: str | None) -> dict[str, object]:
+            calls.append((method, url, payload, token))
+            if url.endswith("/api/auth/login"):
+                return {"token": "g" * 40, "account": {"username": "tanveer_beta2"}}
+            if url.endswith("/api/devices"):
+                return {"device": {"id": payload["device_id"]}}
+            if "/api/me/leaderboard-visibility" in url:
+                return {"account": {"username": "tanveer_beta2", "leaderboard_visible": payload["public_visible"]}}
+            if "/api/leaderboard/me?period=lifetime" in url:
+                return {
+                    "period": "lifetime",
+                    "leaderboard": [{"rank": 1, "username": "tanveer_beta2", "accepted_total": 3102}],
+                    "me": {"username": "tanveer_beta2", "visible": True, "rank": 1, "accepted_total": 3102},
+                }
+            if "/api/leaderboard/me?period=daily" in url:
+                return {
+                    "period": "daily",
+                    "day_utc": "2026-07-23",
+                    "leaderboard": [{"rank": 1, "username": "tanveer_beta2", "accepted_total": 37}],
+                    "me": {"username": "tanveer_beta2", "visible": True, "rank": 1, "accepted_total": 37},
+                }
+            raise AssertionError(f"Unexpected worker call: {method} {url}")
+
+        with tempfile.TemporaryDirectory() as folder:
+            manager = OnlineSyncManager(Path(folder) / "online_sync.json", worker, credential_store=MemoryCredentials())
+            manager.login("tanveer_beta2", "not-sent-to-test", {"lifetime": {}}, "http://worker.test", "Test laptop")
+            private = manager.summary()
+            self.assertFalse(private["leaderboard_visible"])
+            opted_in = manager.set_leaderboard_visibility(True)
+            self.assertTrue(opted_in["leaderboard_visible"])
+            daily = manager.refresh_leaderboard("daily")
+            self.assertEqual(daily["leaderboard_period"], "daily")
+            self.assertEqual(daily["leaderboard_day_utc"], "2026-07-23")
+            self.assertEqual(daily["leaderboard_me"]["rank"], 1)
+            self.assertTrue(any("/api/leaderboard/me?period=daily" in call[1] for call in calls))
 
     def test_normal_sync_batches_five_minutes_without_leaderboard_polling(self) -> None:
         calls: list[tuple[str, str, dict[str, object] | None, str | None]] = []

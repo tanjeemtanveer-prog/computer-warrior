@@ -1,12 +1,12 @@
-# Computer Warrior v0.0.9.1 Automated QA Notes
+# Computer Warrior v0.1.0 Automated QA Notes
 
 - Result: **PASS**
-- Generated: 2026-07-23T07:39:23.665214+00:00
+- Generated: 2026-07-23T09:17:12.510298+00:00
 - Python: 3.13.2
 - Platform: Windows-11-10.0.26200-SP0
 - pynput in test environment: 1.8.2
 - Required Windows runtime dependency: pynput 1.8.2+
-- Tests run: 35
+- Tests run: 37
 - Failures: 0
 - Errors: 0
 - Skipped: 0
@@ -52,7 +52,9 @@ test_beta_invite_code_is_sent_for_registration_but_not_saved (test_core.OnlineSy
 test_daily_goal_route_persists_only_a_local_aggregate_setting (test_core.OnlineSyncTests.test_daily_goal_route_persists_only_a_local_aggregate_setting) ... ok
 test_dashboard_contains_a_beta_invite_field (test_core.OnlineSyncTests.test_dashboard_contains_a_beta_invite_field) ... ok
 test_dashboard_contains_local_daily_goal_and_history_controls (test_core.OnlineSyncTests.test_dashboard_contains_local_daily_goal_and_history_controls) ... ok
+test_dashboard_contains_opt_in_global_leaderboard_controls (test_core.OnlineSyncTests.test_dashboard_contains_opt_in_global_leaderboard_controls) ... ok
 test_dashboard_game_loop_uses_only_existing_aggregate_metrics (test_core.OnlineSyncTests.test_dashboard_game_loop_uses_only_existing_aggregate_metrics) ... ok
+test_global_leaderboard_is_opt_in_and_supports_daily_period (test_core.OnlineSyncTests.test_global_leaderboard_is_opt_in_and_supports_daily_period) ... ok
 test_new_xp_is_queued_once_then_synced_once (test_core.OnlineSyncTests.test_new_xp_is_queued_once_then_synced_once) ... ok
 test_normal_sync_batches_five_minutes_without_leaderboard_polling (test_core.OnlineSyncTests.test_normal_sync_batches_five_minutes_without_leaderboard_polling) ... ok
 test_online_refresh_route_returns_json_instead_of_an_html_404 (test_core.OnlineSyncTests.test_online_refresh_route_returns_json_instead_of_an_html_404) ... ok
@@ -79,7 +81,7 @@ test_session_daily_lifetime_and_daily_rollover (test_core.TrackerTests.test_sess
 test_second_instance_is_rejected (test_core.WindowsMutexTests.test_second_instance_is_rejected) ... ok
 
 ----------------------------------------------------------------------
-Ran 35 tests in 1.538s
+Ran 37 tests in 1.673s
 
 OK
 ```

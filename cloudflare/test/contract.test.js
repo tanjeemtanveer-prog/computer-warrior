@@ -90,6 +90,17 @@ test("identifiers are strict", () => {
   assert.equal(__test.validDeviceId("computer-name-or-hardware-id"), false);
 });
 
+test("global leaderboard periods are restricted and daily boards use UTC dates", () => {
+  assert.equal(__test.leaderboardPeriod("lifetime"), "lifetime");
+  assert.equal(__test.leaderboardPeriod("daily"), "daily");
+  assert.equal(__test.leaderboardPeriod("weekly"), null);
+  const dailyUrl = new URL("https://worker.example/api/leaderboard?period=daily&day=2026-07-23");
+  assert.equal(__test.leaderboardDay(dailyUrl, "daily"), "2026-07-23");
+  const invalidDailyUrl = new URL("https://worker.example/api/leaderboard?period=daily&day=not-a-date");
+  assert.equal(__test.leaderboardDay(invalidDailyUrl, "daily"), null);
+  assert.equal(__test.leaderboardDay(dailyUrl, "lifetime"), null);
+});
+
 test("private beta helpers require an exact invite and bind session hashes to the secret", async () => {
   assert.equal(__test.isPrivateBeta({ APP_ENV: "beta" }), true);
   assert.equal(__test.inviteOnly({ INVITE_ONLY: "true" }), true);

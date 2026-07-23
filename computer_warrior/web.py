@@ -187,6 +187,10 @@ class LocalDashboardServer:
                         result = owner._online_sync.sync_pending()
                     elif action == "refresh":
                         result = owner._online_sync.refresh_leaderboard()
+                    elif action == "leaderboard":
+                        result = owner._online_sync.refresh_leaderboard(str(payload.get("period", "lifetime")))
+                    elif action == "visibility":
+                        result = owner._online_sync.set_leaderboard_visibility(payload.get("public_visible"))
                     elif action == "logout":
                         result = owner._online_sync.logout(snapshot)
                     else:
@@ -248,6 +252,12 @@ class LocalDashboardServer:
                     return
                 elif self.path == "/api/online/refresh":
                     self._online_action("refresh")
+                    return
+                elif self.path == "/api/online/leaderboard":
+                    self._online_action("leaderboard")
+                    return
+                elif self.path == "/api/online/visibility":
+                    self._online_action("visibility")
                     return
                 elif self.path == "/api/online/logout":
                     self._online_action("logout")
