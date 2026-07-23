@@ -1,7 +1,7 @@
-# Computer Warrior v0.0.7.1 Automated QA Notes
+# Computer Warrior v0.0.7.2 Automated QA Notes
 
 - Result: **PASS**
-- Generated: 2026-07-23T06:17:33.581150+00:00
+- Generated: 2026-07-23T06:32:46.413935+00:00
 - Python: 3.13.2
 - Platform: Windows-11-10.0.26200-SP0
 - pynput in test environment: 1.8.2
@@ -34,6 +34,7 @@
 - Beta invite-code forwarding without serializing the invite in local state.
 - Beta dashboard invite field and private Worker configuration separation.
 - Cloudflare-compatible User-Agent on Python Worker requests.
+- Workers Free CPU-compatible beta password work factor.
 - Direct loading of v0.0.1-hotfix.1 schema-version-1 stats without XP loss.
 
 ## Test runner output
@@ -71,7 +72,7 @@ test_session_daily_lifetime_and_daily_rollover (test_core.TrackerTests.test_sess
 test_second_instance_is_rejected (test_core.WindowsMutexTests.test_second_instance_is_rejected) ... ok
 
 ----------------------------------------------------------------------
-Ran 30 tests in 0.833s
+Ran 30 tests in 0.846s
 
 OK
 ```

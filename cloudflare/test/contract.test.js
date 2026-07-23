@@ -102,6 +102,11 @@ test("private beta helpers require an exact invite and bind session hashes to th
   assert.notEqual(first, second);
 });
 
+test("private beta password work factor fits the Workers Free CPU budget", () => {
+  assert.equal(__test.passwordIterations({ APP_ENV: "beta" }), 20_000);
+  assert.equal(__test.passwordIterations({ APP_ENV: "local" }), 100_000);
+});
+
 test("private beta registration rejects a missing invite and creates a session with the exact invite", async () => {
   const database = new AuthTestD1();
   const endpoint = "https://computer-warrior-beta.example/api/auth/register";

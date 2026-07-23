@@ -67,6 +67,7 @@ def main() -> int:
 - Beta invite-code forwarding without serializing the invite in local state.
 - Beta dashboard invite field and private Worker configuration separation.
 - Cloudflare-compatible User-Agent on Python Worker requests.
+- Workers Free CPU-compatible beta password work factor.
 - Direct loading of v0.0.1-hotfix.1 schema-version-1 stats without XP loss.
 
 ## Test runner output

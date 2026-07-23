@@ -1,6 +1,10 @@
 const encoder = new TextEncoder();
 const LOCAL_PASSWORD_ITERATIONS = 100_000;
-const BETA_PASSWORD_ITERATIONS = 310_000;
+// Workers Free allows 10 ms of CPU time per request. 20,000 PBKDF2 rounds
+// leaves budget for the request, D1 writes, and session creation. The stored
+// hash still requires the server-only AUTH_PEPPER, and beta auth is rate
+// limited by a hashed client address.
+const BETA_PASSWORD_ITERATIONS = 20_000;
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
 const AUTH_WINDOW_MS = 15 * 60 * 1000;
 const AUTH_MAX_ATTEMPTS = 8;
@@ -353,4 +357,4 @@ export default {
 };
 
 export { route };
-export const __test = { canonicalSync, constantTimeEqual, inviteOnly, isPrivateBeta, sessionTokenHash, syncPayload, validDeviceId, validUsername };
+export const __test = { canonicalSync, constantTimeEqual, inviteOnly, isPrivateBeta, passwordIterations, sessionTokenHash, syncPayload, validDeviceId, validUsername };

@@ -1,4 +1,4 @@
-# Computer Warrior v0.0.7.1 — Cloudflare User-Agent Hotfix
+# Computer Warrior v0.0.7.2 — Cloudflare Free CPU Auth Hotfix
 
 A Windows-first activity game core that converts anonymous aggregate input activity into XP. It keeps the CLI dashboard and now also serves a live browser dashboard on this PC only.
 
@@ -37,6 +37,16 @@ from rejecting Python's default `Python-urllib/<version>` request signature
 before the Worker API can validate an invite or account request. It does not
 send any additional local activity data and requires no D1 migration or Worker
 redeployment.
+
+## v0.0.7.2 Cloudflare Free CPU auth hotfix
+
+The beta Worker now uses 20,000 PBKDF2-SHA-256 iterations for new beta
+password hashes. This fits Cloudflare Workers Free's 10 ms CPU limit, which
+the former 310,000-iteration setting exceeded during account registration.
+The server-only `AUTH_PEPPER`, a unique password salt, and per-address auth
+throttling remain in place. This release needs a Worker deployment but no D1
+migration. Because no beta account was created successfully, there is no
+existing password hash to migrate.
 
 ## v0.0.6 online sync
 

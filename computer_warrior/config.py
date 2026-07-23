@@ -1,9 +1,9 @@
-"""Configuration constants for Computer Warrior v0.0.7.1."""
+"""Configuration constants for Computer Warrior v0.0.7.2."""
 
 from __future__ import annotations
 
 APP_NAME = "Computer Warrior"
-APP_VERSION = "0.0.7.1"
+APP_VERSION = "0.0.7.2"
 SCHEMA_VERSION = 1
 
 KEYBOARD_XP_PER_PRESS = 1
