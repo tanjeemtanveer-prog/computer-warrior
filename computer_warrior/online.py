@@ -17,6 +17,15 @@ from .config import METRIC_NAMES, ONLINE_SYNC_INTERVAL_SECONDS, SAVE_INTERVAL_SE
 from .credentials import CredentialStore, CredentialStoreError, default_credential_store
 
 DEFAULT_WORKER_URL = "http://127.0.0.1:8787"
+# Cloudflare's Browser Integrity Check can reject urllib's default
+# ``Python-urllib/<version>`` signature before the Worker sees a request.
+# This is a stable, browser-compatible signature for the local dashboard's
+# HTTPS API transport; it carries no user, device, or activity data.
+WORKER_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/150.0.0.0 Safari/537.36"
+)
 HttpRequest = Callable[[str, str, Mapping[str, Any] | None, str | None], Mapping[str, Any]]
 
 
@@ -163,7 +172,7 @@ class OnlineSyncManager:
     @staticmethod
     def _request(method: str, url: str, payload: Mapping[str, Any] | None, token: str | None) -> Mapping[str, Any]:
         body = None if payload is None else json.dumps(payload, separators=(",", ":")).encode("utf-8")
-        headers = {"Accept": "application/json"}
+        headers = {"Accept": "application/json", "User-Agent": WORKER_USER_AGENT}
         if body is not None:
             headers["Content-Type"] = "application/json"
         if token:

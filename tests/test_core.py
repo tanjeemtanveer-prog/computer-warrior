@@ -5,6 +5,7 @@ import json
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import uuid
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -15,7 +16,7 @@ from computer_warrior.config import PIXELS_PER_CURSOR_XP, SCROLL_STEPS_PER_XP
 from computer_warrior.dashboard import LiveDashboard, format_dashboard
 from computer_warrior.model import MetricTotals, PersistedState
 from computer_warrior.persistence import AtomicJsonStore
-from computer_warrior.online import OnlineSyncError, OnlineSyncManager
+from computer_warrior.online import OnlineSyncError, OnlineSyncManager, WORKER_USER_AGENT
 from computer_warrior.single_instance import AlreadyRunningError, WindowsSingleInstance
 from computer_warrior.tracker import ActivityTracker
 from computer_warrior.web import LocalDashboardServer, make_dashboard_payload
@@ -226,6 +227,23 @@ class TrackerTests(unittest.TestCase):
 
 
 class OnlineSyncTests(unittest.TestCase):
+    def test_worker_request_uses_a_browser_compatible_user_agent(self) -> None:
+        class Response:
+            def __enter__(self) -> "Response":
+                return self
+
+            def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
+                return None
+
+            def read(self) -> bytes:
+                return b'{"ok":true}'
+
+        with patch("computer_warrior.online.urlopen", return_value=Response()) as mocked:
+            result = OnlineSyncManager._request("GET", "https://worker.example/api/health", None, None)
+        request = mocked.call_args.args[0]
+        self.assertEqual(result, {"ok": True})
+        self.assertEqual(request.get_header("User-agent"), WORKER_USER_AGENT)
+
     def test_plaintext_session_is_migrated_out_of_json_state(self) -> None:
         class MemoryCredentials:
             def __init__(self) -> None:

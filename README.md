@@ -1,4 +1,4 @@
-# Computer Warrior v0.0.7 — Private Beta Hardening
+# Computer Warrior v0.0.7.1 — Cloudflare User-Agent Hotfix
 
 A Windows-first activity game core that converts anonymous aggregate input activity into XP. It keeps the CLI dashboard and now also serves a live browser dashboard on this PC only.
 
@@ -28,6 +28,15 @@ migration, and two-device QA are completed.
   afterwards; it never serializes that code in `online_sync.json`.
 - Local development remains compatible with existing local accounts and local
   D1 state.
+
+## v0.0.7.1 Cloudflare transport hotfix
+
+The local Python HTTPS client now sends a browser-compatible `User-Agent` when
+calling a Cloudflare Worker. This prevents Cloudflare Browser Integrity Check
+from rejecting Python's default `Python-urllib/<version>` request signature
+before the Worker API can validate an invite or account request. It does not
+send any additional local activity data and requires no D1 migration or Worker
+redeployment.
 
 ## v0.0.6 online sync
 

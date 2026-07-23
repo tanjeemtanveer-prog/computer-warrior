@@ -1,12 +1,12 @@
-# Computer Warrior v0.0.7 Automated QA Notes
+# Computer Warrior v0.0.7.1 Automated QA Notes
 
 - Result: **PASS**
-- Generated: 2026-07-23T05:44:03.438084+00:00
+- Generated: 2026-07-23T06:17:33.581150+00:00
 - Python: 3.13.2
 - Platform: Windows-11-10.0.26200-SP0
 - pynput in test environment: 1.8.2
 - Required Windows runtime dependency: pynput 1.8.2+
-- Tests run: 29
+- Tests run: 30
 - Failures: 0
 - Errors: 0
 - Skipped: 0
@@ -33,6 +33,7 @@
 - Migration of legacy plaintext session state into a non-serialized credential store.
 - Beta invite-code forwarding without serializing the invite in local state.
 - Beta dashboard invite field and private Worker configuration separation.
+- Cloudflare-compatible User-Agent on Python Worker requests.
 - Direct loading of v0.0.1-hotfix.1 schema-version-1 stats without XP loss.
 
 ## Test runner output
@@ -53,6 +54,7 @@ test_open_online_panel_polls_only_the_local_status_endpoint (test_core.OnlineSyn
 test_pending_xp_includes_a_sealed_offline_batch (test_core.OnlineSyncTests.test_pending_xp_includes_a_sealed_offline_batch) ... ok
 test_plaintext_session_is_migrated_out_of_json_state (test_core.OnlineSyncTests.test_plaintext_session_is_migrated_out_of_json_state) ... ok
 test_switching_account_drops_unsynced_xp_instead_of_misattributing_it (test_core.OnlineSyncTests.test_switching_account_drops_unsynced_xp_instead_of_misattributing_it) ... ok
+test_worker_request_uses_a_browser_compatible_user_agent (test_core.OnlineSyncTests.test_worker_request_uses_a_browser_compatible_user_agent) ... ok
 test_atomic_save_backup_and_recovery (test_core.PersistenceTests.test_atomic_save_backup_and_recovery) ... ok
 test_temp_files_are_not_left_after_success (test_core.PersistenceTests.test_temp_files_are_not_left_after_success) ... ok
 test_v001_stats_file_loads_without_migration_or_xp_loss (test_core.PersistenceTests.test_v001_stats_file_loads_without_migration_or_xp_loss) ... ok
@@ -69,7 +71,7 @@ test_session_daily_lifetime_and_daily_rollover (test_core.TrackerTests.test_sess
 test_second_instance_is_rejected (test_core.WindowsMutexTests.test_second_instance_is_rejected) ... ok
 
 ----------------------------------------------------------------------
-Ran 29 tests in 1.119s
+Ran 30 tests in 0.833s
 
 OK
 ```
