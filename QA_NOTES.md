@@ -1,7 +1,7 @@
-# Computer Warrior v0.2.0 Automated QA Notes
+# Computer Warrior v0.2.1 Automated QA Notes
 
 - Result: **PASS**
-- Generated: 2026-07-24T00:47:51.461556+00:00
+- Generated: 2026-07-24T03:30:26.042615+00:00
 - Python: 3.13.2
 - Platform: Windows-11-10.0.26200-SP0
 - pynput in test environment: 1.8.2
@@ -90,7 +90,7 @@ test_session_daily_lifetime_and_daily_rollover (test_core.TrackerTests.test_sess
 test_second_instance_is_rejected (test_core.WindowsMutexTests.test_second_instance_is_rejected) ... ok
 
 ----------------------------------------------------------------------
-Ran 41 tests in 2.107s
+Ran 41 tests in 2.097s
 
 OK
 ```

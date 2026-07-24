@@ -1,6 +1,20 @@
-# Computer Warrior v0.2.0 — Public Site and Analytics Foundation
+# Computer Warrior v0.2.1 — Windows Packaging Foundation
 
 A Windows-first activity game core that converts anonymous aggregate input activity into XP. It keeps the CLI dashboard and now also serves a live browser dashboard on this PC only.
+
+## v0.2.1 Windows packaging foundation
+
+- Adds a repeatable, isolated Windows one-folder build script for the local
+  tracker and dashboard.
+- Pins the package build to the tested Python dependencies, PyInstaller 6.21.0,
+  and `pyinstaller-hooks-contrib` 2026.6.
+- Embeds the local dashboard in the bundle and emits a source revision,
+  `BUILD_INFO.txt`, and SHA-256 manifest for every build.
+- Refuses a dirty source checkout or an existing output directory, preventing
+  accidental packaging of unreviewed code or overwriting an earlier build.
+- Makes no Cloudflare, D1, account, secret, analytics, or public-site change.
+
+Read [V0.2.1_WINDOWS_PACKAGING.md](V0.2.1_WINDOWS_PACKAGING.md) before building.
 
 ## v0.2.0 public site and analytics foundation
 
