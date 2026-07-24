@@ -224,7 +224,10 @@ test("public site is separate, responsive, privacy-explicit, and not a fake sign
   assert.doesNotMatch(landing, /<form\b/i);
   assert.doesNotMatch(landing, /id="onlineDialog"/);
   assert.match(privacy, /What is never recorded/);
-  assert.match(privacy, /CLOUDFLARE_WEB_ANALYTICS/);
+  assert.match(landing, /static\.cloudflareinsights\.com\/beacon\.min\.js/);
+  assert.match(landing, /data-cf-beacon/);
+  assert.match(privacy, /static\.cloudflareinsights\.com\/beacon\.min\.js/);
+  assert.match(privacy, /data-cf-beacon/);
   assert.match(styles, /@media \(max-width: 760px\)/);
   assert.match(styles, /prefers-reduced-motion/);
 });
